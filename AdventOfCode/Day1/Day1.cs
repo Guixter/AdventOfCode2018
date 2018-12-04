@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventOfCode
 {
     class Day1
     {
+
+        public static void Run()
+        {
+            Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
+        }
 
         public static int Part1()
         {

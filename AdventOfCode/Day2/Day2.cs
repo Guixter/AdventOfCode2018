@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventOfCode
 {
     class Day2
     {
 
+        public static void Run()
+        {
+            Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
+        }
+
         public static int Part1()
         {
-            var lines = System.IO.File.ReadAllLines(Program.GetPath(".\\Day2\\Input.txt"));
+            var lines = Program.GetLines(".\\Day2\\Input.txt");
 
             var twoOccurences = 0;
             var threeOccurences = 0;
@@ -37,7 +41,7 @@ namespace AdventOfCode
 
         public static string Part2()
         {
-            var lines = System.IO.File.ReadAllLines(Program.GetPath(".\\Day2\\Input.txt"));
+            var lines = Program.GetLines(".\\Day2\\Input.txt");
 
             for (var i = 0 ; i < lines.Length; i++)
             {

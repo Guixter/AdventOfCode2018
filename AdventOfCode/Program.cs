@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventOfCode
 {
@@ -10,9 +6,13 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Day2.Part1());
-            Console.WriteLine(Day2.Part2());
+            Day3.Run();
             Console.ReadLine();
+        }
+
+        public static string[] GetLines(string pathFromSolutionRoot)
+        {
+            return System.IO.File.ReadAllLines(GetPath(pathFromSolutionRoot));
         }
 
         public static string GetPath(string pathFromSolutionRoot)
