@@ -127,7 +127,7 @@ namespace AdventOfCode
             return mostAsleepGuard * mostAsleepMinute;
         }
 
-        public struct Event : IComparable
+        private struct Event : IComparable
         {
             public DateTime datetime;
             public string message;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace AdventOfCode
 {
@@ -9,7 +8,6 @@ namespace AdventOfCode
     {
         private static readonly int uppercaseDelta = 32;
         private static readonly int nbCharacters = 26;
-
 
         public static void Run()
         {
@@ -19,47 +17,49 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var line = Program.GetLines(".\\Day5\\Input.txt")[0];
-
-            while (React(ref line));
-
-            return line.Length;
+            var line = Program.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
+            return React(line);
         }
 
         public static int Part2()
         {
-            var line = Program.GetLines(".\\Day5\\Input.txt")[0];
+            var line = Program.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
 
             var reactLength = new int[nbCharacters];
             var maxChar = 'a' + nbCharacters;
             for (char c = 'a'; c < maxChar; c++)
             {
-                var cleared = new string(line
+                var cleared = line
                     .Where(x => (x != c) && (x != c - uppercaseDelta))
-                    .ToArray()
-                );
+                    .ToArray();
                 
-                while (React(ref cleared));
-                reactLength[c - 'a'] = cleared.Length;
+                reactLength[c - 'a'] = React(cleared);
             }
 
             return reactLength.OrderBy(x => x).First();
         }
 
-        private static bool React(ref string s)
+        private static int React(char[] s)
         {
-            for (var i = 0; i < s.Length - 1; i++)
-            {
-                var firstChar = s[i];
-                var secondChar = s[i + 1];
+            var stack = new Stack<char>();
 
-                if (Math.Abs(secondChar - firstChar) == uppercaseDelta)
+            foreach (var currentChar in s)
+            {
+                if (stack.Count == 0)
                 {
-                    s = s.Remove(i, 2);
-                    return true;
+                    stack.Push(currentChar);
+                    continue;
                 }
+
+                var lastChar = stack.Peek();
+
+                if (Math.Abs(currentChar - lastChar) == uppercaseDelta)
+                    stack.Pop();
+                else
+                    stack.Push(currentChar);
             }
-            return false;
+
+            return stack.Count;
         }
     }
 }

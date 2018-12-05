@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AdventOfCode
 {
     class Day2
     {
+        private static readonly int nbCharacters = 26;
 
         public static void Run()
         {
@@ -19,21 +19,17 @@ namespace AdventOfCode
 
             var twoOccurences = 0;
             var threeOccurences = 0;
-            var dictionary = new Dictionary<char, int>();
             foreach (var line in lines)
             {
-                dictionary.Clear();
+                var dictionary = new int[nbCharacters];
 
                 foreach (var character in line)
                 {
-                    if (!dictionary.ContainsKey(character))
-                        dictionary.Add(character, 0);
-
-                    dictionary[character]++;
+                    dictionary[character - 'a']++;
                 }
 
-                twoOccurences += dictionary.Where(x => x.Value == 2).Count() > 0 ? 1 : 0;
-                threeOccurences += dictionary.Where(x => x.Value == 3).Count() > 0 ? 1 : 0;
+                twoOccurences += dictionary.Where(x => x == 2).Count() > 0 ? 1 : 0;
+                threeOccurences += dictionary.Where(x => x == 3).Count() > 0 ? 1 : 0;
             }
 
             return twoOccurences * threeOccurences;

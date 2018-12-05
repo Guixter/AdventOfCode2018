@@ -55,7 +55,7 @@ namespace AdventOfCode
             return currentNotOverlapping[0].id;
         }
 
-        struct Rect
+        private struct Rect
         {
             public int id;
             public int left;
