@@ -10,6 +10,7 @@ namespace AdventOfCode
         public static void Run()
         {
             Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
         }
 
         public static int Part1()
@@ -70,6 +71,58 @@ namespace AdventOfCode
             }
 
             var mostAsleepMinute = numberSleepPerMinute.OrderByDescending(x => x.Value).First().Key;
+
+            return mostAsleepGuard * mostAsleepMinute;
+        }
+
+        public static int Part2()
+        {
+            var lines = Program.GetLines(".\\Day4\\Input.txt");
+
+            // Sort the events
+            var orderedEvents = lines
+                .Select(line => Event.Parse(line))
+                .ToList();
+            orderedEvents.Sort();
+
+            // Store the guard/minute "matrix"
+            //   the first index of sleepAmount is the GuardID, the second is the minute.
+            var sleepAmount = new Dictionary<int, Dictionary<int, int>>();
+            var currentGuard = -1;
+            var lastFallAsleep = new DateTime();
+            foreach (var e in orderedEvents)
+            {
+                if (e.beginShift)
+                {
+                    currentGuard = e.beginShiftGuard;
+                }
+                else if (e.fallsAsleep)
+                {
+                    lastFallAsleep = e.datetime;
+                }
+                else if (e.wakesUp)
+                {
+                    if (!sleepAmount.ContainsKey(currentGuard))
+                        sleepAmount[currentGuard] = new Dictionary<int, int>();
+
+                    for (var i = lastFallAsleep.Minute; i < e.datetime.Minute; i++)
+                    {
+                        if (!sleepAmount[currentGuard].ContainsKey(i))
+                            sleepAmount[currentGuard][i] = 0;
+                        sleepAmount[currentGuard][i]++;
+                    }
+                }
+            }
+
+            // Sort by the biggest minute amount for each guard
+            var keys = sleepAmount.Keys.ToArray();
+            for (var i = 0; i < keys.Length; i++)
+            {
+                sleepAmount[keys[i]] = sleepAmount[keys[i]].OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            var mostAsleepGuard = sleepAmount.OrderByDescending(x => x.Value.First().Value).First().Key;
+            var mostAsleepMinute = sleepAmount[mostAsleepGuard].First().Key;
 
             return mostAsleepGuard * mostAsleepMinute;
         }
