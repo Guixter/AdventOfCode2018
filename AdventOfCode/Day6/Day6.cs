@@ -177,8 +177,6 @@ namespace AdventOfCode
 
             // -1 if equally far from multiple points
             public int closestPointId;
-
-            public int totalDistance;
         }
     }
 }
