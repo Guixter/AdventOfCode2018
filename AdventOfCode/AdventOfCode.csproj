@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Day10\Day10.cs" />
     <Compile Include="Day1\Day1.cs" />
     <Compile Include="Day2\Day2.cs" />
     <Compile Include="Day3\Day3.cs" />
@@ -60,6 +61,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Day10\Input.txt" />
     <Content Include="Day1\Input.txt" />
     <Content Include="Day2\Input.txt" />
     <Content Include="Day3\Input.txt" />
