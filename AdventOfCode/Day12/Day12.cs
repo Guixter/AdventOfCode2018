@@ -7,6 +7,9 @@ namespace AdventOfCode
 {
     class Day12
     {
+        private static readonly int ruleLength = 5;
+        private static readonly int ruleRadius = ruleLength / 2;
+
         public static void Run()
         {
             Console.WriteLine(Part1());
@@ -34,49 +37,52 @@ namespace AdventOfCode
             var currentGeneration = new Generation(lines[0]);
             var rules = RuleNode.Parse(lines.Skip(2));
 
-            for (long i = 0; i < nbGenerations; i++)
-            {
-                currentGeneration.ComputeNext(rules);
-            }
-
+            currentGeneration.ComputeGenerations(nbGenerations, rules);
             return currentGeneration.ComputePlantSum();
         }
 
         private struct Generation
         {
-            public bool[] plants;
-            public int firstPlantIndex;
+            private bool[] plants;
+            private long indexFirstPlant;
+            private long generationNumber;
+
+            // Some additional information to avoid unnecessary computing
+            private bool plantsArrayStable; // true when we reach a point where the array stays exactly the same in each generation
+            private int indexFirstPlantDelta; // the first index delta between two generations
 
             private static readonly Regex regex = new Regex(@"initial state: (.*)");
-            private static readonly int ruleLength = 5;
-            private static readonly int ruleRadius = ruleLength / 2;
 
             public Generation(string line)
             {
                 var match = regex.Match(line);
                 if (match.Success)
                 {
-                    var chars = match.Groups[1].Value.ToCharArray();
-                    plants = chars.Select(x => x == '#').ToArray();
-                    firstPlantIndex = 0;
+                    plants = match
+                        .Groups[1]
+                        .Value
+                        .Select(x => x == '#')
+                        .ToArray();
                 }
                 else
                 {
                     plants = new bool[0];
-                    firstPlantIndex = 0;
                 }
+                indexFirstPlant = 0;
+                plantsArrayStable = false;
+                indexFirstPlantDelta = 0;
+                generationNumber = 1;
             }
 
             public void Print()
             {
-                for (var i = firstPlantIndex; i < 0; i++)
+                for (var i = indexFirstPlant; i < 0; i++)
                 {
                     Console.Write(" ");
                 }
                 Console.WriteLine("0");
 
-
-                for (var i = 0; i < firstPlantIndex; i++)
+                for (var i = 0; i < indexFirstPlant; i++)
                 {
                     Console.Write(".");
                 }
@@ -87,7 +93,20 @@ namespace AdventOfCode
                 Console.WriteLine();
             }
 
-            public void ComputeNext(RuleNode rules)
+            public void ComputeGenerations(long nbGenerations, RuleNode rules)
+            {
+                for (long i = 0; i < nbGenerations; i++)
+                {
+                    ComputeNextGeneration(rules);
+                    if (plantsArrayStable)
+                        break;
+                }
+
+                var delta = nbGenerations - generationNumber + 1;
+                indexFirstPlant += delta * indexFirstPlantDelta;
+            }
+
+            public void ComputeNextGeneration(RuleNode rules)
             {
                 // We need to extend to handle the extremities
                 var extendedNewPlants = new bool[plants.Length + 2 * ruleRadius];
@@ -104,7 +123,7 @@ namespace AdventOfCode
                             pattern[j + ruleRadius] = plants[sumIndexes];
                     }
 
-                    extendedNewPlants[i + ruleRadius] = RuleNode.RuleResult(rules, pattern);
+                    extendedNewPlants[i + ruleRadius] = rules.ComputeResult(pattern);
                 }
 
                 // Cut the empty extremities
@@ -119,9 +138,27 @@ namespace AdventOfCode
                 {
                     cleanNewPlants[i] = extendedNewPlants[i + leftOverage];
                 }
+                indexFirstPlantDelta = leftOverage - ruleRadius;
+
+                // Check if constant
+                if (plants.Length == cleanNewPlants.Length)
+                {
+                    var checkConstant = true;
+                    for (var i = 0; i < plants.Length; i++)
+                    {
+                        if (plants[i] != cleanNewPlants[i])
+                        {
+                            checkConstant = false;
+                            break;
+                        }
+                    }
+
+                    plantsArrayStable = checkConstant;
+                }
 
                 plants = cleanNewPlants;
-                firstPlantIndex = firstPlantIndex - ruleRadius + leftOverage;
+                indexFirstPlant = indexFirstPlant + indexFirstPlantDelta;
+                generationNumber++;
             }
 
             public long ComputePlantSum()
@@ -130,7 +167,7 @@ namespace AdventOfCode
                 for (var i = 0; i < plants.Length; i++)
                 {
                     if (plants[i])
-                        result += i + firstPlantIndex;
+                        result += i + indexFirstPlant;
                 }
 
                 return result;
@@ -152,13 +189,13 @@ namespace AdventOfCode
                 {
                     var match = regex.Match(rule);
                     if (match.Success && match.Groups[2].Value.Equals("#"))
-                        root.AddStep(match.Groups[1].Value.ToArray(), 0);
+                        root.AddNodeRecursive(match.Groups[1].Value.ToArray(), 0);
                 }
 
                 return root;
             }
 
-            public void AddStep(char[] rule, int cursor)
+            public void AddNodeRecursive(char[] rule, int cursor)
             {
                 if (cursor == rule.Length)
                     return;
@@ -166,26 +203,27 @@ namespace AdventOfCode
                 if (character == '#')
                 {
                     yes = yes == null ? new RuleNode() : yes;
-                    yes.AddStep(rule, cursor + 1);
+                    yes.AddNodeRecursive(rule, cursor + 1);
                 }
                 else
                 {
                     no = no == null ? new RuleNode() : no;
-                    no.AddStep(rule, cursor + 1);
+                    no.AddNodeRecursive(rule, cursor + 1);
                 }
             }
 
-            public static bool RuleResult(RuleNode node, bool[] pattern) {
+            public bool ComputeResult(bool[] pattern) {
+                var currentNode = this;
                 var patternLength = pattern.Length;
                 for (var i = 0; i < patternLength; i++)
                 {
-                    if (node == null)
+                    if (currentNode == null)
                         return false;
 
-                    node = pattern[i] ? node.yes : node.no;
+                    currentNode = pattern[i] ? currentNode.yes : currentNode.no;
                 }
 
-                return node != null;
+                return currentNode != null;
             }
         }
     }
