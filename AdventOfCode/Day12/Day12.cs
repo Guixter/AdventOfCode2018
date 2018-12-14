@@ -36,7 +36,7 @@ namespace AdventOfCode
 
             for (long i = 0; i < nbGenerations; i++)
             {
-                currentGeneration = currentGeneration.ComputeNext(rules);
+                currentGeneration.ComputeNext(rules);
             }
 
             return currentGeneration.ComputePlantSum();
@@ -87,17 +87,21 @@ namespace AdventOfCode
                 Console.WriteLine();
             }
 
-            public Generation ComputeNext(RuleNode rules)
+            public void ComputeNext(RuleNode rules)
             {
                 // We need to extend to handle the extremities
                 var extendedNewPlants = new bool[plants.Length + 2 * ruleRadius];
-                for (var i = -ruleRadius; i < plants.Length + ruleRadius; i++)
+                var plantLength = plants.Length;
+                var extendedNewPlantsLength = extendedNewPlants.Length;
+                var extendedNewPlantsMax = plantLength + ruleRadius;
+                for (var i = -ruleRadius; i < extendedNewPlantsMax; i++)
                 {
                     var pattern = new bool[ruleLength];
                     for (var j = -ruleRadius; j <= ruleRadius; j++)
                     {
-                        if (i + j >= 0 && i + j < plants.Length)
-                            pattern[j + ruleRadius] = plants[i + j];
+                        var sumIndexes = i + j;
+                        if (sumIndexes >= 0 && sumIndexes < plantLength)
+                            pattern[j + ruleRadius] = plants[sumIndexes];
                     }
 
                     extendedNewPlants[i + ruleRadius] = RuleNode.RuleResult(rules, pattern);
@@ -106,20 +110,18 @@ namespace AdventOfCode
                 // Cut the empty extremities
                 var leftOverage = 0;
                 var rightOverage = 0;
-                while (leftOverage < extendedNewPlants.Length && !extendedNewPlants[leftOverage])
+                while (leftOverage < extendedNewPlantsLength && !extendedNewPlants[leftOverage])
                     leftOverage++;
-                while (rightOverage < extendedNewPlants.Length && !extendedNewPlants[extendedNewPlants.Length - rightOverage - 1])
+                while (rightOverage < extendedNewPlantsLength && !extendedNewPlants[extendedNewPlantsLength - rightOverage - 1])
                     rightOverage++;
-                var cleanNewPlants = new bool[extendedNewPlants.Length - leftOverage - rightOverage];
+                var cleanNewPlants = new bool[extendedNewPlantsLength - leftOverage - rightOverage];
                 for (var i = 0; i < cleanNewPlants.Length; i++)
                 {
                     cleanNewPlants[i] = extendedNewPlants[i + leftOverage];
                 }
 
-                return new Generation() {
-                    plants = cleanNewPlants,
-                    firstPlantIndex = firstPlantIndex - ruleRadius + leftOverage,
-                };
+                plants = cleanNewPlants;
+                firstPlantIndex = firstPlantIndex - ruleRadius + leftOverage;
             }
 
             public long ComputePlantSum()
@@ -173,17 +175,17 @@ namespace AdventOfCode
                 }
             }
 
-            public static bool RuleResult(RuleNode root, bool[] pattern) {
-                var currentNode = root;
-                for (var i = 0; i < pattern.Length; i++)
+            public static bool RuleResult(RuleNode node, bool[] pattern) {
+                var patternLength = pattern.Length;
+                for (var i = 0; i < patternLength; i++)
                 {
-                    if (currentNode == null)
+                    if (node == null)
                         return false;
 
-                    currentNode = pattern[i] ? currentNode.yes : currentNode.no;
+                    node = pattern[i] ? node.yes : node.no;
                 }
 
-                return !(currentNode == null);
+                return node != null;
             }
         }
     }
