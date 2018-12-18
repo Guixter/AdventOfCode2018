@@ -20,8 +20,10 @@ namespace AdventOfCode
             ParseGrid(lines, out var grid, out var units);
             Print(grid);
 
-            while (ProceedRound(grid, units)) {
-                Print(grid);
+            for (var i = 0; i < 1; i++)
+            //while (ProceedRound(grid, units))
+            {
+                ProceedRound(grid, units);
             }
 
             return 0;
@@ -35,6 +37,8 @@ namespace AdventOfCode
             {
                 if (!unit.TakeTurn(grid, units))
                     return false;
+
+                Print(grid);
             }
 
             return true;
@@ -79,6 +83,35 @@ namespace AdventOfCode
             public Unit unit;
 
             public int distanceFlag;
+
+            public int DistanceTo(Tile tile)
+            {
+                // TODO (obstacles)
+                return Math.Abs(x - tile.x) + Math.Abs(y - tile.y);
+            }
+
+            public IEnumerable<Tile> GetAdjacentSquares(Tile[,] grid)
+            {
+                var tiles = new List<Tile>();
+                if (x > 0)
+                    tiles.Add(grid[x - 1, y]);
+                if (x < grid.GetLength(0) - 1)
+                    tiles.Add(grid[x + 1, y]);
+                if (y > 0)
+                    tiles.Add(grid[x, y - 1]);
+                if (y < grid.GetLength(1) - 1)
+                    tiles.Add(grid[x, y + 1]);
+
+                return tiles;
+            }
+
+            public static void ComputeDistances(IEnumerable<Tile> tiles, Tile target)
+            {
+                foreach (var tile in tiles)
+                {
+                    tile.distanceFlag = tile.DistanceTo(target);
+                }
+            }
 
             public static Tile Parse(char character, int x, int y)
             {
@@ -180,45 +213,61 @@ namespace AdventOfCode
             // Return false when there is no reachable square
             private bool Move(Tile[,] grid, List<Unit> units)
             {
-                // Compute reachable squares
+                Tile.ComputeDistances(inRangeSquares, tile);
+
                 var reachableSquares = inRangeSquares
-                    .Where(s => IsReachable(s));
+                    .Where(s => s.distanceFlag >= 0);
 
                 if (reachableSquares.Count() == 0)
                     return false;
 
-                // Find the nearest square
-                foreach (var tile in reachableSquares)
-                {
-                    tile.distanceFlag = DistanceTo(tile.x, tile.y);
-                }
+                var nearestSquare = FindBestSquare(reachableSquares);
 
-                var nearestSquare = reachableSquares
+                PerformStepTowards(grid, nearestSquare);
+
+                return true;
+            }
+
+            private static Tile FindBestSquare(IEnumerable<Tile> squares)
+            {
+                // Find the nearest square
+                var nearestSquare = squares
                     .OrderBy(s => s.distanceFlag)
                     .First();
 
-                // Take first priority nearest quare
-                var nearSquares = reachableSquares
+                // Take read order first priority nearest quare
+                var nearSquares = squares
                     .Where(s => s.distanceFlag == nearestSquare.distanceFlag)
                     .ToList();
                 nearSquares.Sort();
-
-                // TODO : Perform a single step towards the chosen square
-                // Note : don't do it if already in range !
-
-                return true;
+                return nearSquares.First();
             }
 
-            private int DistanceTo(int x, int y)
+            private void PerformStepTowards(Tile[,] grid, Tile target)
             {
-                // TODO (right now we ignore obstacles)
-                return Math.Abs(this.x - x) + Math.Abs(this.y - y);
+                if (target.distanceFlag > 1)
+                {
+                    var adjacentSquares = tile.GetAdjacentSquares(grid);
+                    Tile.ComputeDistances(adjacentSquares, target);
+
+                    var bestSquare = FindBestSquare(adjacentSquares);
+
+                    MoveTo(bestSquare);
+                }
             }
 
-            private bool IsReachable(Tile t)
+            private void MoveTo(Tile target)
             {
-                // TODO
-                return true;
+                if (target.unit != null)
+                    throw new Exception("Destination target already has a unit");
+
+                target.unit = this;
+                tile.unit = null;
+
+                x = target.x;
+                y = target.y;
+
+                tile = target;
             }
 
             private void Attack(Tile[,] grid, List<Unit> units)
