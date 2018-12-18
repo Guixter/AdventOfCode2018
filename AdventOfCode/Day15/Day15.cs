@@ -11,22 +11,51 @@ namespace AdventOfCode
         public static void Run()
         {
             Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
         }
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day15\\testMove.txt");
+            var lines = Program.GetLines(".\\Day15\\Input.txt");
 
-            ParseGrid(lines, out var grid, out var units);
-            Print(grid);
+            var i = SimulateFight(lines, out var grid, out var units);
 
-            for (var i = 0; i < 1; i++)
-            //while (ProceedRound(grid, units))
+            Console.WriteLine(i);
+            PrintGrid(grid);
+
+            return i * units.Sum(x => x.hitPoints);
+        }
+
+        public static int Part2()
+        {
+            var lines = Program.GetLines(".\\Day15\\Input.txt");
+
+            int i;
+            Tile[,] grid;
+            List<Unit> units;
+            var startingAttack = Unit.defaultAttackPower;
+            do
             {
-                ProceedRound(grid, units);
+                i = SimulateFight(lines, out grid, out units, startingAttack++);
+            } while (units.Where(x => x.type == Unit.Type.ELF && x.hitPoints == 0).Count() > 0);
+
+            Console.WriteLine(i + " / " + (startingAttack - 1));
+            PrintGrid(grid);
+
+            return i * units.Sum(x => x.hitPoints);
+        }
+
+        private static int SimulateFight(string[] lines, out Tile[,] grid, out List<Unit> units, int elvesAttackPower = -1)
+        {
+            ParseGrid(lines, out grid, out units, elvesAttackPower);
+
+            var i = 0;
+            while (ProceedRound(grid, units))
+            {
+                i++;
             }
 
-            return 0;
+            return i;
         }
 
         private static bool ProceedRound(Tile[,] grid, List<Unit> units)
@@ -37,14 +66,12 @@ namespace AdventOfCode
             {
                 if (!unit.TakeTurn(grid, units))
                     return false;
-
-                Print(grid);
             }
 
             return true;
         }
 
-        private static void Print(Tile[,] grid)
+        private static void PrintGrid(Tile[,] grid)
         {
             for (var i = 0; i < grid.GetLength(1); i++)
             {
@@ -52,11 +79,28 @@ namespace AdventOfCode
                 {
                     grid[j, i].Print();
                 }
+                Console.Write("  ");
+                for (var j = 0; j < grid.GetLength(0); j++)
+                {
+                    if (grid[j,i].scoreFlag == -1)
+                        Console.Write("# ");
+                    else
+                        Console.Write(grid[j,i].scoreFlag % 10 + " ");
+                }
+                Console.Write("  ");
+                for (var j = 0; j < grid.GetLength(0); j++)
+                {
+                    if (grid[j,i].unit == null)
+                        Console.Write("# ");
+                    else
+                        Console.Write(grid[j,i].unit.hitPoints % 10 + " ");
+                }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
-        private static void ParseGrid(string[] lines, out Tile[,] grid, out List<Unit> units)
+        private static void ParseGrid(string[] lines, out Tile[,] grid, out List<Unit> units, int elvesAttackPower = -1)
         {
             units = new List<Unit>();
             grid = new Tile[lines[0].Length, lines.Length];
@@ -68,7 +112,7 @@ namespace AdventOfCode
                     var character = lines[j][i];
                     grid[i, j] = Tile.Parse(character, i, j);
 
-                    var unit = Unit.Parse(character, i, j, grid[i,j]);
+                    var unit = Unit.Parse(character, i, j, grid[i,j], elvesAttackPower);
                     if (unit != null)
                         units.Add(unit);
                 }
@@ -82,7 +126,7 @@ namespace AdventOfCode
             public Type type;
             public Unit unit;
 
-            public int distanceFlag;
+            public int scoreFlag;
 
             public int DistanceTo(Tile tile)
             {
@@ -105,11 +149,45 @@ namespace AdventOfCode
                 return tiles;
             }
 
-            public static void ComputeDistances(IEnumerable<Tile> tiles, Tile target)
+            public static void ComputeScoreFlag(IEnumerable<Tile> tiles, Func<Tile, int> selector)
             {
                 foreach (var tile in tiles)
                 {
-                    tile.distanceFlag = tile.DistanceTo(target);
+                    tile.scoreFlag = selector(tile);
+                }
+            }
+
+            public static void ComputeDistances(Tile[,] grid, Tile from)
+            {
+                // Initialization
+                for (var i = 0; i < grid.GetLength(0); i++)
+                {
+                    for (var j = 0; j < grid.GetLength(1); j++)
+                    {
+                        grid[i, j].scoreFlag = -1;
+                    }
+                }
+
+                // Iterate through the elements
+                var queue = new Queue<Tuple<Tile, int>>();
+                queue.Enqueue(new Tuple<Tile, int>(from, 0));
+                while (queue.Count() > 0)
+                {
+                    var current = queue.Dequeue();
+                    
+                    if (current.Item1.scoreFlag == -1)
+                    {
+                        current.Item1.scoreFlag = current.Item2;
+
+                        var availableAdjacentSquares = current.Item1
+                            .GetAdjacentSquares(grid)
+                            .Where(x => x.type == Type.EMPTY && x.unit == null);
+
+                        foreach (var square in availableAdjacentSquares)
+                        {
+                            queue.Enqueue(new Tuple<Tile, int>(square, current.Item2 + 1));
+                        }
+                    }
                 }
             }
 
@@ -160,23 +238,32 @@ namespace AdventOfCode
             public int y;
             public Type type;
             public Tile tile;
+            public int hitPoints;
+            public int attackPower;
+            public bool dead;
 
             private IEnumerable<Unit> possibleTargets;
             private IEnumerable<Tile> inRangeSquares;
 
+            public static readonly int defaultHitPoints = 200;
+            public static readonly int defaultAttackPower = 3;
+
             // Return false when the fight ends
             public bool TakeTurn(Tile[,] grid, List<Unit> units)
             {
-                if (!IdentifyTargets(grid, units))
+                if (!dead)
+                {
+                    if (!IdentifyTargets(grid, units))
                     return false;
 
-                if (!ComputeInRangeSquares(grid, units))
-                    return true;
+                    if (!ComputeInRangeSquares(grid, units))
+                        return true;
 
-                if (!IsInRange(grid, units) && !Move(grid, units))
-                    return true;
+                    if (!IsInRange(grid, units) && !Move(grid, units))
+                        return true;
 
-                Attack(grid, units);
+                    Attack(grid, units);
+                }
                 return true;
             }
 
@@ -184,7 +271,7 @@ namespace AdventOfCode
             private bool IdentifyTargets(Tile[,] grid, List<Unit> units)
             {
                 possibleTargets = units
-                    .Where(x => x.type != type);
+                    .Where(x => !x.dead && x.type != type);
                 return possibleTargets.Count() > 0;
             }
 
@@ -192,12 +279,7 @@ namespace AdventOfCode
             private bool ComputeInRangeSquares(Tile[,] grid, List<Unit> units)
             {
                 inRangeSquares = possibleTargets
-                    .Select(t => new Tile[] {
-                        grid[t.x + 1, t.y],
-                        grid[t.x - 1, t.y],
-                        grid[t.x, t.y + 1],
-                        grid[t.x, t.y - 1],
-                    })
+                    .Select(t => t.tile.GetAdjacentSquares(grid))
                     .SelectMany(s => s)
                     .Where(s => s.type == Tile.Type.EMPTY && (s.unit == null || s.unit == this));
                 return inRangeSquares.Count() > 0;
@@ -213,10 +295,10 @@ namespace AdventOfCode
             // Return false when there is no reachable square
             private bool Move(Tile[,] grid, List<Unit> units)
             {
-                Tile.ComputeDistances(inRangeSquares, tile);
+                Tile.ComputeDistances(grid, tile);
 
                 var reachableSquares = inRangeSquares
-                    .Where(s => s.distanceFlag >= 0);
+                    .Where(s => s.scoreFlag >= 0);
 
                 if (reachableSquares.Count() == 0)
                     return false;
@@ -228,16 +310,19 @@ namespace AdventOfCode
                 return true;
             }
 
+            // Compute the best scored square, and selects the read-first if tie
             private static Tile FindBestSquare(IEnumerable<Tile> squares)
             {
+                if (squares.Count() == 0)
+                    return null;
                 // Find the nearest square
                 var nearestSquare = squares
-                    .OrderBy(s => s.distanceFlag)
+                    .OrderBy(s => s.scoreFlag)
                     .First();
 
                 // Take read order first priority nearest quare
                 var nearSquares = squares
-                    .Where(s => s.distanceFlag == nearestSquare.distanceFlag)
+                    .Where(s => s.scoreFlag == nearestSquare.scoreFlag)
                     .ToList();
                 nearSquares.Sort();
                 return nearSquares.First();
@@ -245,10 +330,14 @@ namespace AdventOfCode
 
             private void PerformStepTowards(Tile[,] grid, Tile target)
             {
-                if (target.distanceFlag > 1)
+                if (target.scoreFlag > 0)
                 {
-                    var adjacentSquares = tile.GetAdjacentSquares(grid);
-                    Tile.ComputeDistances(adjacentSquares, target);
+                    var adjacentSquares = tile
+                        .GetAdjacentSquares(grid)
+                        .Where(s => s.type == Tile.Type.EMPTY && s.unit == null);
+                    Tile.ComputeDistances(grid, target);
+                    adjacentSquares = adjacentSquares
+                        .Where(s => s.scoreFlag != -1);
 
                     var bestSquare = FindBestSquare(adjacentSquares);
 
@@ -272,10 +361,28 @@ namespace AdventOfCode
 
             private void Attack(Tile[,] grid, List<Unit> units)
             {
+                var adjacentTargetsSquares = tile
+                    .GetAdjacentSquares(grid)
+                    .Where(x => x.unit != null && x.unit.type != type);
 
+                Tile.ComputeScoreFlag(adjacentTargetsSquares, t => t.unit.hitPoints);
+
+                if (adjacentTargetsSquares.Count() > 0)
+                    FindBestSquare(adjacentTargetsSquares).unit.UndergoAttack(this);
             }
 
-            public static Unit Parse(char character, int x, int y, Tile tile)
+            private void UndergoAttack(Unit attacker)
+            {
+                hitPoints -= attacker.attackPower;
+                if (hitPoints <= 0)
+                {
+                    hitPoints = 0;
+                    dead = true;
+                    tile.unit = null;
+                }
+            }
+
+            public static Unit Parse(char character, int x, int y, Tile tile, int attackPower = -1)
             {
                 if (character == 'G' || character == 'E')
                 {
@@ -285,6 +392,9 @@ namespace AdventOfCode
                         y = y,
                         type = character == 'G' ? Type.GOBLIN : Type.ELF,
                         tile = tile,
+                        attackPower = (attackPower == -1 || character == 'G') ? defaultAttackPower : attackPower,
+                        hitPoints = defaultHitPoints,
+                        dead = false,
                     };
                     return tile.unit;
                 }
