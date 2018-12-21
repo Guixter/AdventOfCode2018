@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace AdventOfCode
 {
@@ -18,6 +19,15 @@ namespace AdventOfCode
         public static string GetPath(string pathFromSolutionRoot)
         {
             return "..\\..\\" + pathFromSolutionRoot;
+        }
+
+        public static void SetOutputFile(string pathFromSolutionRoot)
+        {
+            FileStream filestream = new FileStream(GetPath(pathFromSolutionRoot), FileMode.Create);
+            var streamwriter = new StreamWriter(filestream);
+            streamwriter.AutoFlush = true;
+            Console.SetOut(streamwriter);
+            Console.SetError(streamwriter);
         }
     }
 }

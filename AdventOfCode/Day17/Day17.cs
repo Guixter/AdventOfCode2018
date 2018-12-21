@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,87 +9,164 @@ namespace AdventOfCode
 {
     class Day17
     {
+        private static readonly int printRadius = 30;
+        private static readonly int printStep = 1;
+        private static readonly int firstPrintStep = 0;
 
         private static readonly Position waterSpring = new Position() {
             x = 500,
             y = 0,
         };
-        private static readonly int yMin = 0;
-        private static readonly int yMax = 13;
 
         public static void Run()
         {
+            //Program.SetOutputFile(".\\Day17\\Output.txt");
             Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
         }
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day17\\test.txt");
+            var lines = Program.GetLines(".\\Day17\\Input.txt");
 
             var clays = ParseClays(lines);
-            var grid = BuildGrid(clays, waterSpring);
+            var grid = Grid.Build(clays, waterSpring);
 
-            Print(grid);
+            Compute(grid);
+            //grid.Print();
 
-            return 0;
+            return grid
+                .Flatten()
+                .Where(x => x.type == Tile.Type.WetSand)
+                .Count();
         }
 
-        private static Tile[,] BuildGrid(List<Position> clays, Position waterSpring)
+        public static int Part2()
         {
-            var xMin = clays
-                .Select(x => x.x)
-                .Min();
-            var xMax = clays
-                .Select(x => x.x)
-                .Max();
+            var lines = Program.GetLines(".\\Day17\\Input.txt");
 
-            var grid = new Tile[xMax - xMin + 3, yMax - yMin + 3];
+            var clays = ParseClays(lines);
+            var grid = Grid.Build(clays, waterSpring);
 
-            // Init the grid
-            for (var i = 0; i < grid.GetLength(0); i++)
-            {
-                for (var j = 0; j < grid.GetLength(1); j++)
-                {
-                    grid[i, j] = new Tile() {
-                        type = Tile.Type.Sand,
-                        x = i + xMin,
-                        y = j + yMin,
-                    };
-                }
-            }
+            Compute(grid, false);
+            DryWater(grid, true);
 
-            // Add the clay to the grid
-            foreach (var clay in clays)
-            {
-                grid[clay.x - xMin + 1, clay.y - yMin].type = Tile.Type.Clay;
-            }
-
-            // Add the waterSpring to the grid
-            grid[waterSpring.x - xMin + 1, waterSpring.y - yMin].type = Tile.Type.WaterSpring;
-
-            return grid;
+            return grid
+                .Flatten()
+                .Where(x => x.type == Tile.Type.WetSand)
+                .Count();
         }
 
-        private static void Print(Tile[,] grid)
+        private static void Compute(Grid grid, bool debug = false)
         {
-            Console.Write("  ");
-            for (var j = 0; j < grid.GetLength(0); j++)
-            {
-                Console.Write(j % 10 + " ");
-            }
-            Console.WriteLine();
+            var stack = new Stack<Tile>();
+            stack.Push(grid.Get(waterSpring));
 
-            for (var i = 0; i < grid.GetLength(1); i++)
+            var i = 0;
+            var currentStep = printStep;
+            while (stack.Count() > 0)
             {
-                Console.Write(i % 10 + " ");
-                for (var j = 0; j < grid.GetLength(0); j++)
+                var current = stack.Pop();
+                current.type = Tile.Type.WetSand;
+
+                var below = current.GetBelowTile(grid);
+                if (below != null)
                 {
-                    grid[j, i].Print();
-                    Console.Write(" ");
+                    if (below.type == Tile.Type.Sand)
+                    {
+                        // Classic fall
+                        stack.Push(below);
+                        current.direction = Tile.Direction.Down;
+                    }
+                    else if (below.type == Tile.Type.Clay || (below.type == Tile.Type.WetSand && below.direction == Tile.Direction.Up))
+                    {
+                        var left = FillInDirection(grid, current, true, stack);
+                        var right = FillInDirection(grid, current, false, stack);
+                        if (left && right)
+                        {
+                            current.direction = Tile.Direction.Up;
+                            stack.Push(current.GetUpperTile(grid));
+                        }
+                    }
+                    else if (below.type == Tile.Type.WetSand)
+                    {
+                        current.direction = Tile.Direction.Down;
+                        stack.Push(current.GetBelowTile(grid));
+                    }
                 }
-                Console.WriteLine();
+                else {
+                    current.direction = Tile.Direction.Down;
+                }
+
+                i++;
+                // Precise debugging
+                //if (debug && i >= firstPrintStep && i % currentStep == 0)
+                //{
+                //    Console.WriteLine(i);
+                //    grid.Print(current, printRadius);
+                //    var input = Console.ReadLine();
+                //    if (!string.IsNullOrEmpty(input))
+                //    {
+                //        currentStep = int.Parse(input);
+                //    }
+                //}
+
+                // Debug with animation
+                //System.Threading.Thread.Sleep(50);
+                //grid.Print(current, printRadius);
             }
-            Console.WriteLine();
+        }
+
+        private static bool FillInDirection(Grid grid, Tile start, bool left, Stack<Tile> stack)
+        {
+            var current = start;
+            while (current != null && current.type != Tile.Type.Clay)
+            {
+                current.type = Tile.Type.WetSand;
+                current.direction = left ? Tile.Direction.Left : Tile.Direction.Right;
+                current = left ? current.GetLeftTile(grid) : current.GetRightTile(grid);
+                var currentBelow = current.GetBelowTile(grid);
+
+                if (currentBelow.type == Tile.Type.Sand)
+                {
+                    if (!stack.Contains(current))
+                        stack.Push(current);
+                    return false;
+                }
+                else if (currentBelow.type == Tile.Type.WetSand && currentBelow.direction == Tile.Direction.Down)
+                {
+                    current.type = Tile.Type.WetSand;
+                    current.direction = Tile.Direction.Down;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static void DryWater(Grid grid, bool debug = false)
+        {
+            var wetTiles = grid
+                .Flatten()
+                .Where(x => x.type == Tile.Type.WetSand);
+
+            foreach (var tile in wetTiles)
+            {
+                if (!HasUpTileInSameLine(grid, tile, true) && !HasUpTileInSameLine(grid, tile, false))
+                    tile.type = Tile.Type.DriedSand;
+            }
+        }
+
+        private static bool HasUpTileInSameLine(Grid grid, Tile tile, bool left)
+        {
+            var current = tile;
+            while (current != null && current.type == Tile.Type.WetSand)
+            {
+                if (current.direction == Tile.Direction.Up)
+                    return true;
+
+                current = left ? current.GetLeftTile(grid) : current.GetRightTile(grid);
+            }
+            return false;
         }
 
         private static List<Position> ParseClays(string[] lines)
@@ -153,20 +231,58 @@ namespace AdventOfCode
         private class Tile
         {
             public Type type;
+            public Direction direction;
             public int x;
             public int y;
 
-            public void Print()
+            public Tile GetBelowTile(Grid grid)
+            {
+                return grid.Get(x, y + 1);
+            }
+
+            public Tile GetUpperTile(Grid grid)
+            {
+                return grid.Get(x, y - 1);
+            }
+
+            public Tile GetLeftTile(Grid grid)
+            {
+                return grid.Get(x - 1, y);
+            }
+
+            public Tile GetRightTile(Grid grid)
+            {
+                return grid.Get(x + 1, y);
+            }
+
+            public void Print(StringBuilder builder)
             {
                 switch (type) {
                     case Type.Clay:
-                        Console.Write("#");
+                        builder.Append("#");
                         break;
                     case Type.Sand:
-                        Console.Write(".");
+                        builder.Append(".");
                         break;
-                    case Type.WaterSpring:
-                        Console.Write("+");
+                    case Type.DriedSand:
+                        builder.Append("|");
+                        break;
+                    case Type.WetSand:
+                        switch (direction)
+                        {
+                            case Direction.Up:
+                                builder.Append("^");
+                                break;
+                            case Direction.Down:
+                                builder.Append("v");
+                                break;
+                            case Direction.Left:
+                                builder.Append("<");
+                                break;
+                            case Direction.Right:
+                                builder.Append(">");
+                                break;
+                        }
                         break;
                 }
             }
@@ -175,7 +291,150 @@ namespace AdventOfCode
             {
                 Sand,
                 Clay,
-                WaterSpring,
+                WetSand,
+                DriedSand,
+            }
+
+            public enum Direction
+            {
+                Up,
+                Left,
+                Right,
+                Down,
+            }
+        }
+
+        private class Grid
+        {
+            public Tile[,] values;
+            public int x;
+            public int y;
+
+            public int minClayY;
+
+            public static Grid Build(List<Position> clays, Position waterSpring)
+            {
+                var xMin = clays
+                    .Select(x => x.x)
+                    .Min();
+                var xMax = clays
+                    .Select(x => x.x)
+                    .Max();
+
+                var yMin = clays
+                    .Select(x => x.y)
+                    .Min();
+                var yMax = clays
+                    .Select(x => x.y)
+                    .Max();
+
+                var finalX = Math.Min(waterSpring.x, xMin);
+                var finalY = Math.Min(waterSpring.y, yMin);
+
+                var grid = new Tile[xMax - finalX + 3, yMax - finalY + 1];
+
+                // Init the grid
+                for (var i = 0; i < grid.GetLength(0); i++)
+                {
+                    for (var j = 0; j < grid.GetLength(1); j++)
+                    {
+                        grid[i, j] = new Tile() {
+                            type = Tile.Type.Sand,
+                            x = i + finalX - 1,
+                            y = j + finalY,
+                        };
+                    }
+                }
+
+                // Add the clay to the grid
+                foreach (var clay in clays)
+                {
+                    grid[clay.x - finalX + 1, clay.y - finalY].type = Tile.Type.Clay;
+                }
+
+                // Add the waterSpring to the grid
+                grid[waterSpring.x - finalX + 1, waterSpring.y - finalY].type = Tile.Type.Sand;
+
+                return new Grid() {
+                    values = grid,
+                    x = finalX,
+                    y = finalY,
+                    minClayY = yMin,
+                };
+            }
+
+            public Tile Get(int x, int y)
+            {
+                if (x - this.x < -1
+                    || x - this.x >= values.GetLength(0) - 1
+                    || y - this.y < 0
+                    || y - this.y >= values.GetLength(1))
+                {
+                    return null;
+                }
+                return values[x - this.x + 1, y - this.y];
+            }
+
+            public Tile Get(Position p)
+            {
+                return Get(p.x, p.y);
+            }
+
+            public Tile[] Flatten()
+            {
+                var xSize = values.GetLength(0);
+
+                var nbUselessY = minClayY - y;
+                var ySize = values.GetLength(1) - nbUselessY;
+                var flat = new Tile[xSize * ySize];
+
+                for (var i = 0; i < xSize; i++)
+                {
+                    for (var j = 0; j < ySize; j++)
+                    {
+                        flat[i * ySize + j] = values[i, j + nbUselessY];
+                    }
+                }
+                return flat;
+            }
+
+            public void Print(Tile current = null, int radius = -1)
+            {
+                Console.CursorLeft = 0;
+                Console.CursorTop = 0;
+
+                var xMin = radius == -1 ? 0 : Math.Max(current.x - radius - x, 0);
+                var xMax = radius == -1 ? values.GetLength(0) : Math.Min(current.x + radius - x, values.GetLength(0));
+
+                var yMin = radius == -1 ? y : Math.Max(current.y - radius - y, 0);
+                var yMax = radius == -1 ? values.GetLength(1) : Math.Min(current.y + radius - y, values.GetLength(1));
+                var builder = new StringBuilder();
+                builder.Append("  ");
+                for (var j = xMin; j < xMax; j++)
+                {
+                    builder.Append((j + x - 1) % 10);
+                }
+                Console.WriteLine(builder.ToString());
+
+                for (var i = yMin; i < yMax; i++)
+                {
+                    builder.Clear();
+                    builder.Append((i + y) % 10);
+                    builder.Append(" ");
+                    for (var j = xMin; j < xMax; j++)
+                    {
+                        if (values[j, i] == current)
+                        {
+                            builder.Append("x");
+                        }
+                        else
+                        {
+                            values[j, i].Print(builder);
+                        }
+                    }
+                    Console.WriteLine(builder.ToString());
+                }
+                Console.WriteLine();
             }
         }
     }
