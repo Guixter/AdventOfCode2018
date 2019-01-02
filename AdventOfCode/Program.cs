@@ -7,7 +7,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            Day17.Run();
+            Day18.Run();
             Console.ReadLine();
         }
 
@@ -28,6 +28,22 @@ namespace AdventOfCode
             streamwriter.AutoFlush = true;
             Console.SetOut(streamwriter);
             Console.SetError(streamwriter);
+        }
+
+        public static T[] Flatten<T>(T[,] multiple)
+        {
+            var xSize = multiple.GetLength(0);
+            var ySize = multiple.GetLength(1);
+            var flat = new T[xSize * ySize];
+
+            for (var i = 0; i < xSize; i++)
+            {
+                for (var j = 0; j < ySize; j++)
+                {
+                    flat[i * ySize + j] = multiple[i, j];
+                }
+            }
+            return flat;
         }
     }
 }
