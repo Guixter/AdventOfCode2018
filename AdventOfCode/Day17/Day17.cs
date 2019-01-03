@@ -27,7 +27,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day17\\Input.txt");
+            var lines = Utils.GetLines(".\\Day17\\Input.txt");
 
             var clays = ParseClays(lines);
             var grid = Grid.Build(clays, waterSpring);
@@ -43,7 +43,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day17\\Input.txt");
+            var lines = Utils.GetLines(".\\Day17\\Input.txt");
 
             var clays = ParseClays(lines);
             var grid = Grid.Build(clays, waterSpring);
@@ -100,16 +100,16 @@ namespace AdventOfCode
 
                 i++;
                 // Precise debugging
-                //if (debug && i >= firstPrintStep && i % currentStep == 0)
-                //{
-                //    Console.WriteLine(i);
-                //    grid.Print(current, printRadius);
-                //    var input = Console.ReadLine();
-                //    if (!string.IsNullOrEmpty(input))
-                //    {
-                //        currentStep = int.Parse(input);
-                //    }
-                //}
+                if (debug && i >= firstPrintStep && i % currentStep == 0)
+                {
+                    Console.WriteLine(i);
+                    grid.Print(current, printRadius);
+                    var input = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(input))
+                    {
+                        currentStep = int.Parse(input);
+                    }
+                }
 
                 // Debug with animation
                 //System.Threading.Thread.Sleep(50);

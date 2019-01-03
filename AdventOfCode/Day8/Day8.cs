@@ -16,7 +16,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var line = Program.GetLines(".\\Day8\\Input.txt")[0];
+            var line = Utils.GetLines(".\\Day8\\Input.txt")[0];
             var numbers = line
                 .Split(' ')
                 .Select(x => int.Parse(x))
@@ -29,7 +29,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var line = Program.GetLines(".\\Day8\\Input.txt")[0];
+            var line = Utils.GetLines(".\\Day8\\Input.txt")[0];
             var numbers = line
                 .Split(' ')
                 .Select(x => int.Parse(x))

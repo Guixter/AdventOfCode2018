@@ -15,7 +15,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day4\\Input.txt");
+            var lines = Utils.GetLines(".\\Day4\\Input.txt");
 
             // Sort the events
             var orderedEvents = lines
@@ -32,18 +32,18 @@ namespace AdventOfCode
             var lastFallAsleep = new DateTime();
             foreach (var e in orderedEvents)
             {
-                if (e.beginShift)
+                if (e.BeginShift)
                 {
-                    currentGuard = e.beginShiftGuard;
+                    currentGuard = e.BeginShiftGuard;
                 }
-                else if (e.fallsAsleep)
+                else if (e.FallsAsleep)
                 {
                     lastFallAsleep = e.datetime;
                     if (!sleepKeyTimes.ContainsKey(currentGuard))
                         sleepKeyTimes[currentGuard] = new List<DateTime>();
                     sleepKeyTimes[currentGuard].Add(e.datetime);
                 }
-                else if (e.wakesUp)
+                else if (e.WakesUp)
                 {
                     if (!sleepTimePerGuard.ContainsKey(currentGuard))
                         sleepTimePerGuard[currentGuard] = 0;
@@ -77,7 +77,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day4\\Input.txt");
+            var lines = Utils.GetLines(".\\Day4\\Input.txt");
 
             // Sort the events
             var orderedEvents = lines
@@ -92,15 +92,15 @@ namespace AdventOfCode
             var lastFallAsleep = new DateTime();
             foreach (var e in orderedEvents)
             {
-                if (e.beginShift)
+                if (e.BeginShift)
                 {
-                    currentGuard = e.beginShiftGuard;
+                    currentGuard = e.BeginShiftGuard;
                 }
-                else if (e.fallsAsleep)
+                else if (e.FallsAsleep)
                 {
                     lastFallAsleep = e.datetime;
                 }
-                else if (e.wakesUp)
+                else if (e.WakesUp)
                 {
                     if (!sleepAmount.ContainsKey(currentGuard))
                         sleepAmount[currentGuard] = new Dictionary<int, int>();
@@ -127,30 +127,30 @@ namespace AdventOfCode
             return mostAsleepGuard * mostAsleepMinute;
         }
 
-        private struct Event : IComparable
+        private struct Event : IComparable<Event>
         {
             public DateTime datetime;
             public string message;
 
-            public bool beginShift { get
+            public bool BeginShift { get
                 {
                     return messageRegex.Match(message).Success;
                 }
             }
 
-            public int beginShiftGuard { get
+            public int BeginShiftGuard { get
                 {
                     return int.Parse(messageRegex.Match(message).Groups[1].Value);
                 }
             }
 
-            public bool fallsAsleep { get
+            public bool FallsAsleep { get
                 {
                     return message.Equals(fallAsleepMessage);
                 }
             }
 
-            public bool wakesUp { get
+            public bool WakesUp { get
                 {
                     return message.Equals(wakeUpMessage);
                 }
@@ -161,9 +161,9 @@ namespace AdventOfCode
             private static readonly string fallAsleepMessage = "falls asleep";
             private static readonly string wakeUpMessage = "wakes up";
 
-            public int CompareTo(object obj)
+            public int CompareTo(Event obj)
             {
-                return datetime.CompareTo(((Event) obj).datetime);
+                return datetime.CompareTo(obj.datetime);
             }
 
             public static Event Parse(string line)

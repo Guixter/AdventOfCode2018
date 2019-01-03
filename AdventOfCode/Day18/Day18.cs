@@ -16,14 +16,14 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day18\\Input.txt");
+            var lines = Utils.GetLines(".\\Day18\\Input.txt");
             var grid = ComputeStraight(lines, 10);
             return ComputeProduct(grid);
         }
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day18\\Input.txt");
+            var lines = Utils.GetLines(".\\Day18\\Input.txt");
             var grid = ComputeWithCycleDetection(lines, 1000000000, 50);
             return ComputeProduct(grid);
         }
@@ -117,7 +117,7 @@ namespace AdventOfCode
 
         private static int ComputeProduct(Tile[,] grid)
         {
-            var flat = Program.Flatten(grid);
+            var flat = Utils.Flatten(grid);
             var nbTrees = flat
                 .Where(x => x.type == Tile.Type.Tree)
                 .Count();

@@ -20,7 +20,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var line = Program.GetLines(".\\Day9\\Input.txt")[0];
+            var line = Utils.GetLines(".\\Day9\\Input.txt")[0];
 
             Parse(line, out var nbPlayers, out var lastMarble);
 
@@ -51,7 +51,7 @@ namespace AdventOfCode
 
         public static long Part2()
         {
-            var line = Program.GetLines(".\\Day9\\Input.txt")[0];
+            var line = Utils.GetLines(".\\Day9\\Input.txt")[0];
 
             Parse(line, out var nbPlayers, out var lastMarble);
 

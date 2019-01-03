@@ -15,7 +15,7 @@ namespace AdventOfCode
 
         public static string Part1()
         {
-            var lines = Program.GetLines(".\\Day13\\Input.txt");
+            var lines = Utils.GetLines(".\\Day13\\Input.txt");
             ParseTracks(lines, out var grid, out var carts);
 
             Tile crashTile = null;
@@ -28,7 +28,7 @@ namespace AdventOfCode
 
         public static string Part2()
         {
-            var lines = Program.GetLines(".\\Day13\\Input.txt");
+            var lines = Utils.GetLines(".\\Day13\\Input.txt");
             ParseTracks(lines, out var grid, out var carts);
 
             IEnumerable<Cart> aliveCarts = carts;

@@ -18,7 +18,7 @@ namespace AdventOfCode
 
         public static long Part1()
         {
-            var lines = Program.GetLines(".\\Day12\\Input.txt");
+            var lines = Utils.GetLines(".\\Day12\\Input.txt");
             var nbGenerations = 20;
 
             return ComputePlantSum(lines, nbGenerations);
@@ -26,7 +26,7 @@ namespace AdventOfCode
 
         public static long Part2()
         {
-            var lines = Program.GetLines(".\\Day12\\Input.txt");
+            var lines = Utils.GetLines(".\\Day12\\Input.txt");
             var nbGenerations = 50000000000;
 
             return ComputePlantSum(lines, nbGenerations);
@@ -202,12 +202,12 @@ namespace AdventOfCode
                 var character = rule[cursor];
                 if (character == '#')
                 {
-                    yes = yes == null ? new RuleNode() : yes;
+                    yes = yes ?? new RuleNode();
                     yes.AddNodeRecursive(rule, cursor + 1);
                 }
                 else
                 {
-                    no = no == null ? new RuleNode() : no;
+                    no = no ?? new RuleNode();
                     no.AddNodeRecursive(rule, cursor + 1);
                 }
             }

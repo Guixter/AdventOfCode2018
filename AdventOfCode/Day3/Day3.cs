@@ -16,16 +16,16 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day3\\Input.txt");
+            var lines = Utils.GetLines(".\\Day3\\Input.txt");
 
             var maxSize = 1000;
             var matrix = new int[maxSize * maxSize];
             foreach (var line in lines)
             {
                 var rect = Rect.Parse(line);
-                for (var i = rect.left; i <= rect.right; i++)
+                for (var i = rect.left; i <= rect.Right; i++)
                 {
-                    for (var j = rect.top; j <= rect.bottom; j++)
+                    for (var j = rect.top; j <= rect.Bottom; j++)
                     {
                         matrix[i * maxSize + j]++;
                     }
@@ -37,7 +37,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day3\\Input.txt");
+            var lines = Utils.GetLines(".\\Day3\\Input.txt");
 
             var handledRectangles = new HashSet<Rect>();
             var currentNotOverlapping = new List<Rect>(lines.Length);
@@ -63,14 +63,14 @@ namespace AdventOfCode
             public int width;
             public int height;
 
-            public int right
+            public int Right
             {
                 get {
                     return left + width - 1;
                 }
             }
 
-            public int bottom
+            public int Bottom
             {
                 get {
                     return top + height - 1;
@@ -101,17 +101,17 @@ namespace AdventOfCode
             public bool Contains(int i, int j)
             {
                 return i >= left
-                    && i <= right
+                    && i <= Right
                     && j >= top
-                    && j <= bottom;
+                    && j <= Bottom;
             }
 
             public bool Contains(Rect other)
             {
                 return Contains(other.left, other.top)
-                    || Contains(other.left, other.bottom)
-                    || Contains(other.right, other.top)
-                    || Contains(other.right, other.bottom);
+                    || Contains(other.left, other.Bottom)
+                    || Contains(other.Right, other.top)
+                    || Contains(other.Right, other.Bottom);
             }
 
             public bool Overlaps(Rect other)

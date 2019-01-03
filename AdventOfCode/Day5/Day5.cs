@@ -17,13 +17,13 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var line = Program.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
+            var line = Utils.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
             return React(line);
         }
 
         public static int Part2()
         {
-            var line = Program.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
+            var line = Utils.GetLines(".\\Day5\\Input.txt")[0].ToCharArray();
 
             var reactLength = new int[nbCharacters];
             var maxChar = 'a' + nbCharacters;

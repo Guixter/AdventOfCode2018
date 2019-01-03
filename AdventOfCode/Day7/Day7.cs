@@ -16,7 +16,7 @@ namespace AdventOfCode
 
         public static string Part1()
         {
-            var lines = Program.GetLines(".\\Day7\\Input.txt");
+            var lines = Utils.GetLines(".\\Day7\\Input.txt");
 
             var nodes = Parse(lines);
             var freeNodes = GetRootNodes(nodes);
@@ -42,7 +42,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day7\\Input.txt");
+            var lines = Utils.GetLines(".\\Day7\\Input.txt");
             var nbWorkers = 5;
 
             var nodes = Parse(lines);
@@ -72,7 +72,7 @@ namespace AdventOfCode
                     {
                         currentTask.workTime++;
 
-                        if (currentTask.workTime == currentTask.totalTime)
+                        if (currentTask.workTime == currentTask.TotalTime)
                         {
                             currentTasks[workerId] = null;
                             doneNodes.Add(currentTask);
@@ -143,14 +143,14 @@ namespace AdventOfCode
             }
         }
 
-        private class Node : IComparable
+        private class Node : IComparable<Node>
         {
             public List<Node> next = new List<Node>();
             public List<Node> dependencies = new List<Node>();
             public char name;
             public int workTime = 0;
 
-            public int totalTime { get {
+            public int TotalTime { get {
                     return defaultTime + 1 + (name - 'A');
             }}
 
@@ -173,9 +173,9 @@ namespace AdventOfCode
                 }
             }
 
-            public int CompareTo(object obj)
+            public int CompareTo(Node obj)
             {
-                return name.CompareTo(((Node) obj).name);
+                return name.CompareTo(obj.name);
             }
         }
     }

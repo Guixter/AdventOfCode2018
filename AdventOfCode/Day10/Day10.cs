@@ -15,7 +15,7 @@ namespace AdventOfCode
 
         public static int Part1_2()
         {
-            var lines = Program.GetLines(".\\Day10\\Input.txt");
+            var lines = Utils.GetLines(".\\Day10\\Input.txt");
 
             var stars = new Star[lines.Length];
             for (var i = 0; i < lines.Length; i++)

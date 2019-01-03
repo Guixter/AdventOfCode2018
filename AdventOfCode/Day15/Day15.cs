@@ -16,7 +16,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day15\\Input.txt");
+            var lines = Utils.GetLines(".\\Day15\\Input.txt");
 
             var i = SimulateFight(lines, out var grid, out var units);
 
@@ -28,7 +28,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day15\\Input.txt");
+            var lines = Utils.GetLines(".\\Day15\\Input.txt");
 
             int i;
             Tile[,] grid;

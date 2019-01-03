@@ -10,22 +10,22 @@ namespace AdventOfCode
     {
         private static readonly Instruction[] instructions = new Instruction[]
         {
-            new Instruction.addr(),
-            new Instruction.addi(),
-            new Instruction.mulr(),
-            new Instruction.muli(),
-            new Instruction.banr(),
-            new Instruction.bani(),
-            new Instruction.borr(),
-            new Instruction.bori(),
-            new Instruction.setr(),
-            new Instruction.seti(),
-            new Instruction.gtir(),
-            new Instruction.gtri(),
-            new Instruction.gtrr(),
-            new Instruction.eqir(),
-            new Instruction.eqri(),
-            new Instruction.eqrr(),
+            new Instruction.Addr(),
+            new Instruction.Addi(),
+            new Instruction.Mulr(),
+            new Instruction.Muli(),
+            new Instruction.Banr(),
+            new Instruction.Bani(),
+            new Instruction.Borr(),
+            new Instruction.Bori(),
+            new Instruction.Setr(),
+            new Instruction.Seti(),
+            new Instruction.Gtir(),
+            new Instruction.Gtri(),
+            new Instruction.Gtrr(),
+            new Instruction.Eqir(),
+            new Instruction.Eqri(),
+            new Instruction.Eqrr(),
         };
 
         public static void Run()
@@ -36,7 +36,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Program.GetLines(".\\Day16\\Input.txt");
+            var lines = Utils.GetLines(".\\Day16\\Input.txt");
 
             var snapshots = ParseCpuSnapshots(lines, out var lastLine);
 
@@ -47,7 +47,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Program.GetLines(".\\Day16\\Input.txt");
+            var lines = Utils.GetLines(".\\Day16\\Input.txt");
 
             var snapshots = ParseCpuSnapshots(lines, out var lastLine);
             var opcodeMapping = ComputeOpcodeMapping(snapshots);
@@ -224,7 +224,7 @@ namespace AdventOfCode
 
             public abstract void Process(Command command, int[] registers);
 
-            public class addr : Instruction
+            public class Addr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -232,7 +232,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class addi : Instruction
+            public class Addi : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -240,7 +240,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class mulr : Instruction
+            public class Mulr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -248,7 +248,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class muli : Instruction
+            public class Muli : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -256,7 +256,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class banr : Instruction
+            public class Banr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -264,7 +264,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class bani : Instruction
+            public class Bani : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -272,7 +272,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class borr : Instruction
+            public class Borr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -280,7 +280,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class bori : Instruction
+            public class Bori : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -288,7 +288,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class setr : Instruction
+            public class Setr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -296,7 +296,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class seti : Instruction
+            public class Seti : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -304,7 +304,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class gtir : Instruction
+            public class Gtir : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -312,7 +312,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class gtri : Instruction
+            public class Gtri : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -320,7 +320,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class gtrr : Instruction
+            public class Gtrr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -328,7 +328,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class eqir : Instruction
+            public class Eqir : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -336,7 +336,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class eqri : Instruction
+            public class Eqri : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {
@@ -344,7 +344,7 @@ namespace AdventOfCode
                 }
             }
 
-            public class eqrr : Instruction
+            public class Eqrr : Instruction
             {
                 public override void Process(Command command, int[] registers)
                 {

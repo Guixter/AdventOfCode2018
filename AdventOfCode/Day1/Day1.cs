@@ -14,7 +14,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = System.IO.File.ReadAllLines(Program.GetPath(".\\Day1\\Input.txt"));
+            var lines = Utils.GetLines(".\\Day1\\Input.txt");
 
             var result = 0;
             foreach (var line in lines)
@@ -28,7 +28,7 @@ namespace AdventOfCode
         public static int Part2()
         {
             var set = new HashSet<int>();
-            var lines = System.IO.File.ReadAllLines(Program.GetPath(".\\Day1\\Input.txt"));
+            var lines = Utils.GetLines(".\\Day1\\Input.txt");
 
             var currentFrequency = 0;
             while(true)
