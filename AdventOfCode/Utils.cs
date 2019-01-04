@@ -41,10 +41,5 @@ namespace AdventOfCode
             }
             return flat;
         }
-
-        public static void PrintGrid<T>(T[,] grid)
-        {
-
-        }
     }
 }

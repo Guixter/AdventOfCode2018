@@ -45,7 +45,7 @@ namespace AdventOfCode
                 .Count();
         }
 
-        public static int Part2()
+        public static long Part2()
         {
             var lines = Utils.GetLines(".\\Day16\\Input.txt");
 
@@ -54,7 +54,7 @@ namespace AdventOfCode
 
             // Execute the instructions
             var program = ParseProgram(lines, lastLine + 4);
-            var registers = new int[4];
+            var registers = new long[4];
             foreach (var command in program)
             {
                 opcodeMapping[command.opcode].Process(command, registers);
@@ -137,7 +137,7 @@ namespace AdventOfCode
             return list;
         }
 
-        private struct Command
+        public struct Command
         {
             public int opcode;
             public int a;
@@ -168,8 +168,8 @@ namespace AdventOfCode
         private class CpuSnapshot
         {
             public Command command;
-            public int[] before;
-            public int[] after;
+            public long[] before;
+            public long[] after;
 
             private static readonly Regex regex = new Regex(@".*\[(.*), (.*), (.*), (.*)\]");
 
@@ -194,16 +194,16 @@ namespace AdventOfCode
                 };
             }
 
-            private static int[] ParseRegisters(string line)
+            private static long[] ParseRegisters(string line)
             {
                 var match = regex.Match(line);
                 if (match.Success)
                 {
-                    return new int[] {
-                        int.Parse(match.Groups[1].Value),
-                        int.Parse(match.Groups[2].Value),
-                        int.Parse(match.Groups[3].Value),
-                        int.Parse(match.Groups[4].Value),
+                    return new long[] {
+                        long.Parse(match.Groups[1].Value),
+                        long.Parse(match.Groups[2].Value),
+                        long.Parse(match.Groups[3].Value),
+                        long.Parse(match.Groups[4].Value),
                     };
                 }
                 else
@@ -213,142 +213,223 @@ namespace AdventOfCode
             }
         }
 
-        private abstract class Instruction
+        public abstract class Instruction
         {
-            public int[] ProcessClone(Command command, int[] registers)
+            public long[] ProcessClone(Command command, long[] registers)
             {
-                var result = (int[]) registers.Clone();
+                var result = (long[]) registers.Clone();
                 Process(command, result);
                 return result;
             }
 
-            public abstract void Process(Command command, int[] registers);
+            public abstract void Process(Command command, long[] registers);
+            public abstract string ToString(Command command);
 
             public class Addr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] + registers[command.b];
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " + " + (char) ('A' + command.b);
                 }
             }
 
             public class Addi : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] + command.b;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " + " + command.b;
                 }
             }
 
             public class Mulr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] * registers[command.b];
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " * " + (char) ('A' + command.b);
                 }
             }
 
             public class Muli : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] * command.b;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " * " + command.b;
                 }
             }
 
             public class Banr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] & registers[command.b];
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " & " + (char) ('A' + command.b);
                 }
             }
 
             public class Bani : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] & command.b;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " & " + command.b;
                 }
             }
 
             public class Borr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] | registers[command.b];
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " | " + (char) ('A' + command.b);
                 }
             }
 
             public class Bori : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
-                    registers[command.c] = registers[command.a] | command.b;
+                    registers[command.c] = (int) registers[command.a] | command.b;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " | " + command.b;
                 }
             }
 
             public class Setr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a];
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a);
                 }
             }
 
             public class Seti : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = command.a;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + command.a;
                 }
             }
 
             public class Gtir : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = command.a > registers[command.b] ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + command.a + " > " + (char) ('A' + command.b);
                 }
             }
 
             public class Gtri : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] > command.b ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " > " + command.b;
                 }
             }
 
             public class Gtrr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] > registers[command.b] ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " > " + (char) ('A' + command.b);
                 }
             }
 
             public class Eqir : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = command.a == registers[command.b] ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + command.a + " == " + (char) ('A' + command.b);
                 }
             }
 
             public class Eqri : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] == command.b ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " == " + command.b;
                 }
             }
 
             public class Eqrr : Instruction
             {
-                public override void Process(Command command, int[] registers)
+                public override void Process(Command command, long[] registers)
                 {
                     registers[command.c] = registers[command.a] == registers[command.b] ? 1 : 0;
+                }
+
+                public override string ToString(Command command)
+                {
+                    return (char) ('A' + command.c) + " = " + (char) ('A' + command.a) + " == " + (char) ('A' + command.b);
                 }
             }
         }
