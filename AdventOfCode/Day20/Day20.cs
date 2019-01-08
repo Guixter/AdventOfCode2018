@@ -15,13 +15,18 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var line = Utils.GetLines(".\\Day20\\test5.txt")[0];
+            var line = Utils.GetLines(".\\Day20\\Input.txt")[0];
 
             Parse(line, out var root, out var allNodes);
             var grid = ToGrid(allNodes);
-            Print(grid);
+            //Print(grid);
 
-            return 0;
+            ComputeDistances(root, allNodes);
+            //Print(grid, true);
+
+            return allNodes
+                .Select(x => (int) x.distance)
+                .Max();
         }
 
         private static void Parse(string line, out Room root, out HashSet<Room> allNodes)
@@ -158,7 +163,7 @@ namespace AdventOfCode
             return result;
         }
 
-        private static void Print(Room[,] grid)
+        private static void Print(Room[,] grid, bool debug = false)
         {
             // First row
             Console.Write('#');
@@ -173,10 +178,17 @@ namespace AdventOfCode
                 Console.Write('#');
                 for (var j = 0; j < grid.GetLength(0); j++)
                 {
-                    if (grid[j,i].x == 0 && grid[j,i].y == 0)
-                        Console.Write('X');
+                    if (debug)
+                    {
+                        Console.Write((int) grid[j, i].distance % 10);
+                    }
                     else
-                        Console.Write('.');
+                    {
+                        if (grid[j,i].x == 0 && grid[j,i].y == 0)
+                            Console.Write('X');
+                        else
+                            Console.Write('.');
+                    }
                     if (grid[j, i] != null && grid[j,i].east != null)
                     {
                         Console.Write('|');
@@ -205,12 +217,41 @@ namespace AdventOfCode
             }
         }
 
+        private static void ComputeDistances(Room root, HashSet<Room> allNodes)
+        {
+            // Init the distances
+            foreach (var node in allNodes)
+            {
+                node.distance = float.PositiveInfinity;
+            }
+
+            // Iterate through the graph
+            var queue = new Queue<Tuple<Room, float>>();
+            queue.Enqueue(new Tuple<Room, float>(root, 0));
+            while (queue.Count > 0)
+            {
+                var tuple = queue.Dequeue();
+                var current = tuple.Item1;
+                var currentDistance = tuple.Item2;
+
+                if (currentDistance < current.distance)
+                {
+                    current.distance = currentDistance;
+                    foreach (var neighbour in current.GetConnectedRooms())
+                    {
+                        queue.Enqueue(new Tuple<Room, float>(neighbour, currentDistance + 1));
+                    }
+                }
+            }
+        }
+
         private class Room
         {
             public int x;
             public int y;
 
             public int debug;
+            public float distance;
 
             public Room north;
             public Room south;
