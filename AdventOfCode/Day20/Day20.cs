@@ -11,6 +11,7 @@ namespace AdventOfCode
         public static void Run()
         {
             Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
         }
 
         public static int Part1()
@@ -27,6 +28,23 @@ namespace AdventOfCode
             return allNodes
                 .Select(x => (int) x.distance)
                 .Max();
+        }
+
+        public static int Part2()
+        {
+            var line = Utils.GetLines(".\\Day20\\Input.txt")[0];
+
+            Parse(line, out var root, out var allNodes);
+            var grid = ToGrid(allNodes);
+            //Print(grid);
+
+            ComputeDistances(root, allNodes);
+            //Print(grid, true);
+
+            return allNodes
+                .Select(x => (int) x.distance)
+                .Where(x => x >= 1000)
+                .Count();
         }
 
         private static void Parse(string line, out Room root, out HashSet<Room> allNodes)
