@@ -35,113 +35,102 @@ namespace AdventOfCode
             var map = new Dictionary<Tuple<int, int>, Room>();
             allNodes = new HashSet<Room>();
 
-            var currentNodes = new Queue<Tuple<Room, int>>();
-            currentNodes.Enqueue(new Tuple<Room, int>(root, 1));
+            var currentNodes = new List<Room>();
+            currentNodes.Add(root);
+            var stack = new Stack<Tuple<HashSet<Room>, HashSet<Room>>>();
             map.Add(new Tuple<int, int>(0, 0), root);
-            while (currentNodes.Count > 0)
+            allNodes.Add(root);
+            for (var i = 1; i < line.Length - 1; i++)
             {
-                var tuple = currentNodes.Dequeue();
-                var current = tuple.Item1;
-                var i = tuple.Item2;
                 var character = line[i];
-                allNodes.Add(current);
 
-                if (character == '$') {
-                    continue;
-                }
-                else if (character == '(')
+                if (character == '(')
                 {
-                    currentNodes.Enqueue(new Tuple<Room, int>(current, i + 1));
-                    var j = i + 1;
-                    var nbBranches = 1;
-                    while (nbBranches > 0)
-                    {
-                        if (line[j] == '|' && nbBranches == 1)
-                            currentNodes.Enqueue(new Tuple<Room, int>(current, j + 1));
-                        if (line[j] == '(')
-                            nbBranches++;
-                        if (line[j] == ')')
-                            nbBranches--;
-                        j++;
-                    }
+                    var start = new HashSet<Room>();
+                    start.UnionWith(currentNodes);
+                    var end = new HashSet<Room>();
+                    stack.Push(new Tuple<HashSet<Room>, HashSet<Room>>(start, end));
                 }
                 else if (character == ')')
                 {
-                    currentNodes.Enqueue(new Tuple<Room, int>(current, i + 1));
+                    var tuple = stack.Pop();
+                    tuple.Item2.UnionWith(currentNodes);
+                    currentNodes = tuple.Item2.ToList();
                 }
                 else if (character == '|')
                 {
-                    var j = i + 1;
-                    var nbBranches = 1;
-                    while (nbBranches > 0)
-                    {
-                        if (line[j] == '(')
-                            nbBranches++;
-                        if (line[j] == ')')
-                            nbBranches--;
-                        j++;
-                    }
-
-                    currentNodes.Enqueue(new Tuple<Room, int>(current, j));
+                    var tuple = stack.Peek();
+                    tuple.Item2.UnionWith(currentNodes);
+                    currentNodes = tuple.Item1.ToList();
                 }
                 else
                 {
-                    // Get the new position
-                    var newX = current.x;
-                    var newY = current.y;
-
-                    switch(character)
+                    for (var j = 0; j < currentNodes.Count; j++)
                     {
-                        case 'N':
-                            newY--;
-                            break;
-                        case 'S':
-                            newY++;
-                            break;
-                        case 'W':
-                            newX--;
-                            break;
-                        case 'E':
-                            newX++;
-                            break;
+                        currentNodes[j] = HandleDirection(currentNodes[j], character, map);
+                        allNodes.Add(currentNodes[j]);
                     }
-
-                    // Get the new tile
-                    var newPosition = new Tuple<int, int>(newX, newY);
-                    if (!map.TryGetValue(newPosition, out var newTile))
-                    {
-                        newTile = new Room() {
-                            x = newX,
-                            y = newY,
-                            debug = map.Count,
-                        };
-                        map.Add(newPosition, newTile);
-                    }
-
-                    // Update the links
-                    switch(character)
-                    {
-                        case 'N':
-                            current.north = newTile;
-                            newTile.south = current;
-                            break;
-                        case 'S':
-                            current.south = newTile;
-                            newTile.north = current;
-                            break;
-                        case 'W':
-                            current.west = newTile;
-                            newTile.east = current;
-                            break;
-                        case 'E':
-                            current.east = newTile;
-                            newTile.west = current;
-                            break;
-                    }
-
-                    currentNodes.Enqueue(new Tuple<Room, int>(newTile, i + 1));
                 }
             }
+        }
+
+        // Return true if the node is deleted
+        private static Room HandleDirection(Room currentNode, char character, Dictionary<Tuple<int, int>, Room> map)
+        {
+            // Get the new position
+            var newX = currentNode.x;
+            var newY = currentNode.y;
+
+            switch(character)
+            {
+                case 'N':
+                    newY--;
+                    break;
+                case 'S':
+                    newY++;
+                    break;
+                case 'W':
+                    newX--;
+                    break;
+                case 'E':
+                    newX++;
+                    break;
+            }
+
+            // Get the new tile
+            var newPosition = new Tuple<int, int>(newX, newY);
+            if (!map.TryGetValue(newPosition, out var newTile))
+            {
+                newTile = new Room() {
+                    x = newX,
+                    y = newY,
+                    debug = map.Count,
+                };
+                map.Add(newPosition, newTile);
+            }
+
+            // Update the links
+            switch(character)
+            {
+                case 'N':
+                    currentNode.north = newTile;
+                    newTile.south = currentNode;
+                    break;
+                case 'S':
+                    currentNode.south = newTile;
+                    newTile.north = currentNode;
+                    break;
+                case 'W':
+                    currentNode.west = newTile;
+                    newTile.east = currentNode;
+                    break;
+                case 'E':
+                    currentNode.east = newTile;
+                    newTile.west = currentNode;
+                    break;
+            }
+
+            return newTile;
         }
 
         private static Room[,] ToGrid(HashSet<Room> allNodes)
@@ -184,7 +173,9 @@ namespace AdventOfCode
                     }
                     else
                     {
-                        if (grid[j,i].x == 0 && grid[j,i].y == 0)
+                        if (grid[j,i] == null)
+                            Console.Write('#');
+                        else if (grid[j,i].x == 0 && grid[j,i].y == 0)
                             Console.Write('X');
                         else
                             Console.Write('.');
