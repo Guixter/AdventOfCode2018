@@ -1,0 +1,38 @@
+﻿0	F = 123
+1	F = F & 456
+2	F = F == 72
+3	B = F + B
+4	B = 0
+5	F = 0
+6	D = F | 65536
+7	F = 521363
+8	E = D & 255
+9	F = F + E
+10	F = F & 16777215
+11	F = F * 65899
+12	F = F & 16777215
+13	E = 256 > D
+14	B = E + B
+15	B = B + 1
+16	B = 27
+17	E = 0
+18	C = E + 1
+19	C = C * 256
+20	C = C > D
+21	B = C + B
+22	B = B + 1
+23	B = 25
+24	E = E + 1
+25	B = 17
+26	D = E
+27	B = 7
+28	E = F == A
+29	B = E + B
+30	B = 5
+
+
+0  1  2  3  4  5
+A  B  C  D  E  F
+
+
+The pass 1 is a simple translation of the assembly code into a more readable langage.

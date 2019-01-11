@@ -44,12 +44,14 @@ namespace AdventOfCode
                 {
                     reg[2] = reg[3] + 1;
                 }
+
+                return true;
             });
 
             return registers[0];
         }
 
-        private static void Compute(int binding, Command[] commands, long[] registers, bool debug = false, Action<long, long[]> additionalStep = null)
+        public static void Compute(int binding, Command[] commands, long[] registers, bool debug = false, Func<long, long[], bool> additionalStep = null)
         {
             var ip = (long) 0;
 
@@ -58,7 +60,8 @@ namespace AdventOfCode
                 var current = commands[ip];
 
                 // Perform an additional step if necessary
-                additionalStep?.Invoke(ip, registers);
+                if (additionalStep != null && !additionalStep.Invoke(ip, registers))
+                    break;
 
                 if (debug)
                     Console.Write("ip=" + ip + " ");
@@ -120,7 +123,7 @@ namespace AdventOfCode
             Console.Write("]");
         }
 
-        private struct Command
+        public struct Command
         {
             public Day16.Command command;
             public Day16.Instruction instruction;

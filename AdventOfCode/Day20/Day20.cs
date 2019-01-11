@@ -53,8 +53,7 @@ namespace AdventOfCode
             var map = new Dictionary<Tuple<int, int>, Room>();
             allNodes = new HashSet<Room>();
 
-            var currentNodes = new List<Room>();
-            currentNodes.Add(root);
+            var currentNodes = new List<Room> { root };
             var stack = new Stack<Tuple<HashSet<Room>, HashSet<Room>>>();
             map.Add(new Tuple<int, int>(0, 0), root);
             allNodes.Add(root);

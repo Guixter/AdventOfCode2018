@@ -1,0 +1,35 @@
+﻿0	F = 123
+1	F &= 456
+2	F = F == 72
+3	IP += (F == 72)
+4	GOTO 1
+5	F = 0
+6	D = F | 65536
+7	F = 521363
+8	E = D & 255
+9	F += E
+10	F &+ 16777215
+11	F *= 65899
+12	F &= 16777215
+13	E = 256 > D
+14	IP += (256 > D)
+15	GOTO 17
+16	GOTO 28
+17	E = 0
+18	C = E + 1
+19	C *= 256
+20	C = C > D
+21	IP += (C > D)
+22	GOTO 24
+23	GOTO 26
+24	E += 1
+25	GOTO 18
+26	D = E
+27	GOTO 8
+28	E = F == A
+29	IP += (F == A)
+30	GOTO 6
+
+IP = B
+
+The pass 2 improves readability. It also translates the absolute jumps into GOTO statements and the bound register B into IP.
