@@ -32,7 +32,7 @@ namespace AdventOfCode
             Command.Parse(lines, out var binding, out var commands);
             var registers = new long[6] { 1, 0, 0, 0, 0, 0 };
 
-            Compute(binding, commands, registers, false, (ip, reg) => {
+            Compute(binding, commands, registers, false, (ip, reg, _) => {
                 // Few "hacks" to speed the process up
                 // (I found them by retro-engineering the code, thanks to the debugger)
                 if (ip == 3 && reg[2] == 1)
@@ -51,16 +51,19 @@ namespace AdventOfCode
             return registers[0];
         }
 
-        public static void Compute(int binding, Command[] commands, long[] registers, bool debug = false, Func<long, long[], bool> additionalStep = null)
+        public static int Compute(int binding, Command[] commands, long[] registers, bool debug = false, Func<long, long[], int, bool> additionalStep = null)
         {
             var ip = (long) 0;
 
+            var nbIterations = 0;
             while (ip < commands.Length)
             {
+                nbIterations++;
+
                 var current = commands[ip];
 
                 // Perform an additional step if necessary
-                if (additionalStep != null && !additionalStep.Invoke(ip, registers))
+                if (additionalStep != null && !additionalStep.Invoke(ip, registers, nbIterations))
                     break;
 
                 if (debug)
@@ -90,6 +93,8 @@ namespace AdventOfCode
                 if (debug)
                     Debugger(registers);
             }
+
+            return nbIterations;
         }
 
         private static void Debugger(long[] registers)

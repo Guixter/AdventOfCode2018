@@ -33,3 +33,6 @@
 
 The pass 3 translates IP changes into conditions.
 After each "if" statement, the first > is the if block, the second > is the else block.
+
+Hack to speed the process up :
+ip = 20 : C > D   =>   (E + 1) * 256 > D   =>   E = D / 256

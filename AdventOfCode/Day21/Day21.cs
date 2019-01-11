@@ -24,7 +24,7 @@ namespace AdventOfCode
             // When looking at the code, we can see that A never changes,
             // and that the code exits whenever F == A at ip 28 (see pass_3.txt).
             // So the correct answer is the first value of F when we reach ip 28.
-            Day19.Compute(binding, commands, registers, false, (ip, reg) => {
+            Day19.Compute(binding, commands, registers, false, (ip, reg, _) => {
                 return ip != 28;
             });
 
@@ -38,20 +38,32 @@ namespace AdventOfCode
             Day19.Command.Parse(lines, out var binding, out var commands);
             var registers = new long[6] { 0, 0, 0, 0, 0, 0 };
 
-            var hashSet = new HashSet<long>();
+            var dictionary = new Dictionary<long, int>();
 
-            Day19.Compute(binding, commands, registers, false, (ip, reg) => {
+            // To solve this problem, we try to find a cycle
+            Day19.Compute(binding, commands, registers, false, (ip, reg, nbIterations) => {
                 if (ip == 28)
                 {
-                    if (hashSet.Contains(reg[5]))
+                    if (dictionary.ContainsKey(reg[5]))
                         return false;
-                    hashSet.Add(reg[5]);
+                    dictionary.Add(reg[5], nbIterations);
+                }
+                if (ip == 18)
+                {
+                    // Hack to speed the process up : E = D / 256 (see pass_3.txt)
+                    reg[4] = reg[3] / 256;
                 }
                 
                 return true;
             });
 
-            return hashSet.Max();
+            var maximumValue = dictionary
+                .Select(x => x.Value)
+                .Max();
+            return dictionary
+                .Where(x => x.Value == maximumValue)
+                .First()
+                .Key;
         }
     }
 }
