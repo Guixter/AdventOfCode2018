@@ -11,13 +11,44 @@ namespace AdventOfCode
         public static void Run()
         {
             Console.WriteLine(Part1());
+            Console.WriteLine(Part2());
         }
 
         public static int Part1()
         {
             var lines = Utils.GetLines(".\\Day24\\Input.txt");
-
             Army.Parse(lines, out var immune, out var infection);
+
+            var winner = ComputeAllFights(immune, infection);
+
+            return winner.groups
+                .Select(x => x.nbUnits)
+                .Sum();
+        }
+
+        public static int Part2()
+        {
+            var lines = Utils.GetLines(".\\Day24\\Input.txt");
+            Army.Parse(lines, out var immune, out var infection);
+
+            var boost = 0;
+            Army winner;
+            while ((winner = ComputeAllFights(immune, infection, false, boost)) != immune)
+            {
+                boost++;
+            }
+
+            return winner.groups
+                .Select(x => x.nbUnits)
+                .Sum();
+        }
+
+        private static Army ComputeAllFights(Army immune, Army infection, bool debug = false, int immuneBoost = 0)
+        {
+            immune.boost = immuneBoost;
+            immune.Reset();
+            infection.Reset();
+            
 
             while (immune.IsAlive() && infection.IsAlive())
             {
@@ -27,17 +58,14 @@ namespace AdventOfCode
                         .Where(x => x.IsAlive())
                     )
                     .ToList();
-                Fight(groups, immune, infection, false);
+                if (Fight(groups, immune, infection, debug) == 0)
+                    return null;
             }
 
-            var winner = immune.IsAlive() ? immune : infection;
-
-            return winner.groups
-                .Select(x => x.nbUnits)
-                .Sum();
+            return immune.IsAlive() ? immune : infection;
         }
 
-        private static void Fight(List<Group> groups, Army immune, Army infection, bool debug = false)
+        private static int Fight(List<Group> groups, Army immune, Army infection, bool debug = false)
         {
             if (debug)
             {
@@ -65,13 +93,16 @@ namespace AdventOfCode
                 Console.WriteLine();
 
             // Perform the attacks
+            var nbKilledUnits = 0;
             groups.Sort(Group.CompareToOffensive);
             foreach (var group in groups)
             {
-                group.Attack(debug);
+                nbKilledUnits += group.Attack(debug);
             }
             if (debug)
                 Console.WriteLine();
+
+            return nbKilledUnits;
         }
 
         private class Army
@@ -79,6 +110,7 @@ namespace AdventOfCode
             public List<Group> groups;
             public string name;
             public Army enemy;
+            public int boost;
 
             public bool IsAlive()
             {
@@ -124,10 +156,19 @@ namespace AdventOfCode
                     groups[i].Print();
                 }
             }
+
+            public void Reset()
+            {
+                foreach (var group in groups)
+                {
+                    group.nbUnits = group.initNbUnits;
+                }
+            }
         }
 
         private class Group
         {
+            public int initNbUnits;
             public int nbUnits;
             public Army army;
             public int num;
@@ -151,7 +192,7 @@ namespace AdventOfCode
             {
                 get
                 {
-                    return nbUnits * attackDamage;
+                    return nbUnits * (attackDamage + army.boost);
                 }
             }
 
@@ -186,10 +227,12 @@ namespace AdventOfCode
                 }
             }
 
-            public void Attack(bool debug)
+            public int Attack(bool debug)
             {
                 if (IsAlive() && target != null)
-                    target.UndergoAttack(this, debug);
+                    return target.UndergoAttack(this, debug);
+                else
+                    return 0;
             }
 
             public int ComputeDamage(Group attacker)
@@ -218,7 +261,7 @@ namespace AdventOfCode
                     Console.WriteLine(army.name + " " + num + " chose " + target.army.name + " " + target.num);
             }
 
-            public void UndergoAttack(Group attacker, bool debug)
+            public int UndergoAttack(Group attacker, bool debug)
             {
                 var killedUnits = ComputeDamage(attacker) / hitPoints;
                 killedUnits = Math.Min(killedUnits, nbUnits);
@@ -226,6 +269,8 @@ namespace AdventOfCode
 
                 if (debug)
                     Console.WriteLine(attacker.army.name + " group " + attacker.num + " attacks defending group " + num + ", killing " + killedUnits + " units");
+
+                return killedUnits;
             }
 
             public static int CompareToDefensive(Group x, Group y)
@@ -259,6 +304,7 @@ namespace AdventOfCode
                     return new Group() {
                         army = army,
                         nbUnits = int.Parse(match.Groups[1].Value),
+                        initNbUnits = int.Parse(match.Groups[1].Value),
                         hitPoints = int.Parse(match.Groups[2].Value),
                         attackDamage = int.Parse(match.Groups[4].Value),
                         initiative = int.Parse(match.Groups[6].Value),
