@@ -29,15 +29,15 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day22\\Input.txt");
+            var lines = Utils.GetLines(".\\Day22\\test.txt");
             var grid = Grid.Parse(lines);
 
-            var result = grid.ComputeShortestPath(1, 7);
-            //grid.Print(result);
+            var result = grid.ComputeShortestPath(1, 7, false);
+            //grid.Print(result, true);
             return result.time;
         }
 
-        private class Tile
+        private class Tile : IComparable<Tile>
         {
             public int x;
             public int y;
@@ -116,6 +116,15 @@ namespace AdventOfCode
                 return list;
             }
 
+            public int CompareTo(Tile other)
+            {
+                var xComparison = x.CompareTo(other.x);
+                if (xComparison != 0)
+                    return xComparison;
+
+                return y.CompareTo(other.y);
+            }
+
             public enum Type
             {
                 Rocky,
@@ -124,7 +133,7 @@ namespace AdventOfCode
             }
         }
 
-        private class Grid : IComparer<Step>, IComparer<Tile>
+        private class Grid
         {
             public int depth;
             public Tile target;
@@ -175,9 +184,9 @@ namespace AdventOfCode
                 }
             }
 
-            public Step ComputeShortestPath(int travelTime, int changeToolTime)
+            public Step ComputeShortestPath(int travelTime, int changeToolTime, bool debug = false)
             {
-                var queue = new SortedSet<Step>(this);
+                var queue = new SortedSet<Step>();
                 queue.Add(new Step()
                 {
                     tile = this[0, 0],
@@ -189,6 +198,9 @@ namespace AdventOfCode
                 {
                     var current = queue.First();
                     queue.Remove(current);
+
+                    if (debug)
+                        Print(current);
 
                     if (IsToolAdequate(current.tool, current.tile.type))
                     {
@@ -212,7 +224,9 @@ namespace AdventOfCode
                         else
                         {
                             // Move to another tile
-                            foreach (var neighbour in current.tile.GetNeighbours(this))
+                            var neighbours = current.tile.GetNeighbours(this)
+                                .Where(x => !current.ContainsAsParent(x));
+                            foreach (var neighbour in neighbours)
                             {
                                 var newStep = new Step()
                                 {
@@ -338,37 +352,42 @@ namespace AdventOfCode
 
                 return result;
             }
-
-            public int Compare(Step x, Step y)
-            {
-                var timeComparison = x.time.CompareTo(y.time);
-                if (timeComparison != 0)
-                    return timeComparison;
-
-                var toolComparison = x.tool.CompareTo(y.tool);
-                if (toolComparison != 0)
-                    return toolComparison;
-
-                return Compare(x.tile, y.tile);
-            }
-
-            public int Compare(Tile x, Tile y)
-            {
-                var xComparison = x.x.CompareTo(y.x);
-                if (xComparison != 0)
-                    return xComparison;
-
-                return x.y.CompareTo(y.y);
-            }
         }
 
-        private class Step
+        private class Step : IComparable<Step>
         {
             public Tile tile;
             public Tool tool;
             public int time;
 
             public Step parent;
+
+            public int CompareTo(Step other)
+            {
+                var timeComparison = time.CompareTo(other.time);
+                if (timeComparison != 0)
+                    return timeComparison;
+
+                var toolComparison = tool.CompareTo(other.tool);
+                if (toolComparison != 0)
+                    return toolComparison;
+
+                return tile.CompareTo(other.tile);
+            }
+
+            public bool ContainsAsParent(Tile tile)
+            {
+                var current = parent;
+
+                while (current != null)
+                {
+                    if (current.tile == tile)
+                        return true;
+                    current = current.parent;
+                }
+
+                return false;
+            }
 
             public enum Tool
             {
