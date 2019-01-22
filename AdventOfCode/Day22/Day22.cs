@@ -29,11 +29,12 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day22\\test.txt");
+            var lines = Utils.GetLines(".\\Day22\\Input.txt");
             var grid = Grid.Parse(lines);
 
-            var result = grid.ComputeShortestPath(1, 7, false);
-            //grid.Print(result, true);
+            var result = grid.ComputeShortestPath(1, 7);
+            //grid.Print(result);
+
             return result.time;
         }
 
@@ -104,10 +105,11 @@ namespace AdventOfCode
 
             public IEnumerable<Tile> GetNeighbours(Grid grid)
             {
-                var list = new List<Tile>();
-
-                list.Add(grid[x + 1, y]);
-                list.Add(grid[x, y + 1]);
+                var list = new List<Tile>
+                {
+                    grid[x + 1, y],
+                    grid[x, y + 1]
+                };
 
                 if (x > 0)
                     list.Add(grid[x - 1, y]);
@@ -123,6 +125,36 @@ namespace AdventOfCode
                     return xComparison;
 
                 return y.CompareTo(other.y);
+            }
+
+            public bool IsToolAdequate(Step.Tool tool)
+            {
+                switch (type)
+                {
+                    case Type.Narrow:
+                        return tool != Step.Tool.ClimbingGear;
+                    case Type.Rocky:
+                        return tool != Step.Tool.None;
+                    case Type.Wet:
+                        return tool != Step.Tool.Torch;
+                    default:
+                        return false;
+                }
+            }
+
+            public Step.Tool[] GetAdequateTools()
+            {
+                switch (type)
+                {
+                    case Type.Narrow:
+                        return new Step.Tool[] { Step.Tool.None, Step.Tool.Torch };
+                    case Type.Rocky:
+                        return new Step.Tool[] { Step.Tool.ClimbingGear, Step.Tool.Torch };
+                    case Type.Wet:
+                        return new Step.Tool[] { Step.Tool.None, Step.Tool.ClimbingGear };
+                    default:
+                        return null;
+                }
             }
 
             public enum Type
@@ -186,63 +218,65 @@ namespace AdventOfCode
 
             public Step ComputeShortestPath(int travelTime, int changeToolTime, bool debug = false)
             {
-                var queue = new SortedSet<Step>();
-                queue.Add(new Step()
+                var queue = new SortedSet<Step>
                 {
-                    tile = this[0, 0],
-                    time = 0,
-                    tool = Step.Tool.Torch,
-                });
+                    new Step()
+                    {
+                        tile = this[0, 0],
+                        time = 0,
+                        tool = Step.Tool.Torch,
+                    }
+                };
+                var set = new HashSet<Tuple<Tile, Step.Tool>>();
 
                 while (queue.Count > 0)
                 {
                     var current = queue.First();
                     queue.Remove(current);
 
+                    var tuple = new Tuple<Tile, Step.Tool>(current.tile, current.tool);
+                    if (set.Contains(tuple))
+                        continue;
+                    set.Add(tuple);
+
                     if (debug)
                         Print(current);
 
-                    if (IsToolAdequate(current.tool, current.tile.type))
+                    if (current.tile == target)
                     {
-                        if (current.tile == target)
+                        if (current.tool == Step.Tool.Torch)
                         {
-                            if (current.tool == Step.Tool.Torch)
-                            {
-                                return current;
-                            }
-                            else
-                            {
-                                queue.Add(new Step()
-                                {
-                                    tile = current.tile,
-                                    time = current.time + changeToolTime,
-                                    tool  = Step.Tool.Torch,
-                                    parent = current,
-                                });
-                            }
+                            return current;
                         }
                         else
                         {
-                            // Move to another tile
-                            var neighbours = current.tile.GetNeighbours(this)
-                                .Where(x => !current.ContainsAsParent(x));
-                            foreach (var neighbour in neighbours)
+                            queue.Add(new Step()
                             {
-                                var newStep = new Step()
-                                {
-                                    tile = neighbour,
-                                    time = current.time + travelTime,
-                                    tool = current.tool,
-                                    parent = current,
-                                };
-                                var test = queue.Add(newStep);
-                            }
+                                tile = current.tile,
+                                time = current.time + changeToolTime,
+                                tool  = Step.Tool.Torch,
+                                parent = current,
+                            });
                         }
                     }
                     else
                     {
+                        // Move to another tile
+                        var neighbours = current.tile.GetNeighbours(this)
+                            .Where(x => x.IsToolAdequate(current.tool));
+                        foreach (var neighbour in neighbours)
+                        {
+                            queue.Add(new Step()
+                            {
+                                tile = neighbour,
+                                time = current.time + travelTime,
+                                tool = current.tool,
+                                parent = current,
+                            });
+                        }
+
                         // Change the tool
-                        foreach (var tool in GetAdequateTools(current.tile.type))
+                        foreach (var tool in current.tile.GetAdequateTools())
                         {
                             queue.Add(new Step() {
                                 tile = current.tile,
@@ -255,36 +289,6 @@ namespace AdventOfCode
                 }
 
                 return null;
-            }
-
-            private bool IsToolAdequate(Step.Tool tool, Tile.Type type)
-            {
-                switch (type)
-                {
-                    case Tile.Type.Narrow:
-                        return tool != Step.Tool.ClimbingGear;
-                    case Tile.Type.Rocky:
-                        return tool != Step.Tool.None;
-                    case Tile.Type.Wet:
-                        return tool != Step.Tool.Torch;
-                    default:
-                        return false;
-                }
-            }
-
-            private Step.Tool[] GetAdequateTools(Tile.Type type)
-            {
-                switch (type)
-                {
-                    case Tile.Type.Narrow:
-                        return new Step.Tool[] { Step.Tool.None, Step.Tool.Torch };
-                    case Tile.Type.Rocky:
-                        return new Step.Tool[] { Step.Tool.ClimbingGear, Step.Tool.Torch };
-                    case Tile.Type.Wet:
-                        return new Step.Tool[] { Step.Tool.None, Step.Tool.ClimbingGear };
-                    default:
-                        return null;
-                }
             }
 
             public void Print(int x, int y, int maxX, int maxY)
@@ -309,22 +313,46 @@ namespace AdventOfCode
 
             public void Print(Step step)
             {
-                var list = new List<Step>();
-                while (step != null)
+                var list = step.Flatten();
+                var xMax = list.Select(x => x.tile.x).Max();
+                var yMax = list.Select(x => x.tile.y).Max();
+
+                // Build the grid
+                var grid = new char[xMax + 1, yMax + 1];
+                grid[0, 0] = 'T';
+                for (var i = 1; i < list.Count; i++)
                 {
-                    list.Add(step);
-                    step = step.parent;
+                    var current = list[i];
+                    var last = list[i - 1];
+
+                    if (current.tool != last.tool)
+                    {
+                        grid[current.tile.x, current.tile.y] = current.tool.ToString()[0];
+                    }
+                    else
+                    {
+                        grid[current.tile.x, current.tile.y] = '*';
+                    }
                 }
 
-                list.Reverse();
-
-
-                foreach (var s in list)
+                // Print the grid
+                for (var i = 0; i < grid.GetLength(1); i++)
                 {
-                    Print(s.tile.x, s.tile.y, targetX + 5, targetY + 5);
-                    Console.WriteLine(s.time);
-                    Console.WriteLine(s.tool.ToString());
-                    Console.ReadLine();
+                    for (var j = 0; j < grid.GetLength(0); j++)
+                    {
+                        var character = grid[j, i];
+                        if (character == 0)
+                            this[j, i].Print(this);
+                        else
+                            Console.Write(grid[j, i]);
+                    }
+                    Console.Write("  ");
+
+                    for (var j = 0; j < grid.GetLength(0); j++)
+                    {
+                        this[j, i].Print(this);
+                    }
+                    Console.WriteLine();
                 }
             }
 
@@ -359,8 +387,22 @@ namespace AdventOfCode
             public Tile tile;
             public Tool tool;
             public int time;
-
             public Step parent;
+
+            public List<Step> Flatten()
+            {
+                var list = new List<Step>();
+                var step = this;
+                while (step != null)
+                {
+                    list.Add(step);
+                    step = step.parent;
+                }
+
+                list.Reverse();
+
+                return list;
+            }
 
             public int CompareTo(Step other)
             {
@@ -373,20 +415,6 @@ namespace AdventOfCode
                     return toolComparison;
 
                 return tile.CompareTo(other.tile);
-            }
-
-            public bool ContainsAsParent(Tile tile)
-            {
-                var current = parent;
-
-                while (current != null)
-                {
-                    if (current.tile == tile)
-                        return true;
-                    current = current.parent;
-                }
-
-                return false;
             }
 
             public enum Tool
