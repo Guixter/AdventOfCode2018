@@ -6,11 +6,25 @@ using System.Text.RegularExpressions;
 namespace AdventOfCodeTools
 {
     // TODO :
-    // - interface for each day
-    // - utils methods (rectangle, matrix, ...)
+    // - data structs (matrixes, grids, ...)
+    // - ** debug tools ** !!!
 
     public class IO
     {
+        public static void Print(object text, ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
+        {
+            Console.ForegroundColor = color;
+            Console.BackgroundColor = background;
+            Console.Write(text);
+            Console.ResetColor();
+        }
+
+        public static void PrintLine(object text, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
 
         public static string[] GetStringLines(string pathFromSolution)
         {

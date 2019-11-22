@@ -10,8 +10,8 @@ namespace AdventOfCode
 
         public static void Run()
         {
-            Console.WriteLine(Part1());
-            Console.WriteLine(Part2());
+            IO.PrintLine(Part1(), ConsoleColor.Green);
+            IO.PrintLine(Part2(), ConsoleColor.Green);
         }
 
         public static int Part1()
