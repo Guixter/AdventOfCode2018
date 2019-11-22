@@ -26,9 +26,9 @@ namespace AdventOfCode
             foreach (var line in lines)
             {
                 var rect = ParseRectangle(line);
-                for (var i = (int) rect.left; i <= rect.right; i++)
+                for (var i = (int) rect.xMin; i <= rect.xMax; i++)
                 {
-                    for (var j = (int) rect.top; j <= rect.bottom; j++)
+                    for (var j = (int) rect.yMin; j <= rect.yMax; j++)
                     {
                         matrix[i * maxSize + j]++;
                     }
@@ -44,10 +44,10 @@ namespace AdventOfCode
             return new Rect
             {
                 meta = int.Parse(values[0]),
-                left = int.Parse(values[1]),
-                top = int.Parse(values[2]),
-                width = int.Parse(values[3]),
-                height = int.Parse(values[4]),
+                xMin = int.Parse(values[1]),
+                yMin = int.Parse(values[2]),
+                xLength = int.Parse(values[3]),
+                yLength = int.Parse(values[4]),
             };
         }
 

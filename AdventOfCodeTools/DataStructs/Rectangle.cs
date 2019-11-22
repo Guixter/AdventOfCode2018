@@ -1,40 +1,43 @@
-﻿using System;
-
-namespace AdventOfCodeTools
+﻿namespace AdventOfCodeTools
 {
     public struct Rectangle<T>
     {
-        public float left;
-        public float top;
-        public float width;
-        public float height;
+        public float xMin;
+        public float yMin;
+        public float xLength;
+        public float yLength;
         public T meta;
 
-        public float right
+        public float xMax
         {
-            get => left + width - 1;
+            get => xMin + xLength - 1;
         }
 
 
-        public float bottom
+        public float yMax
         {
-            get => top + height - 1;
+            get => yMin + yLength - 1;
         }
 
-        public bool Contains(float i, float j)
+        public bool Contains(float x, float y)
         {
-            return i >= left
-                && i <= right
-                && j >= top
-                && j <= bottom;
+            return x >= xMin
+                && x <= xMax
+                && y >= yMin
+                && y <= yMax;
+        }
+
+        public bool Contains<K>(Point2<K> point)
+        {
+            return Contains(point.x, point.y);
         }
 
         public bool Contains(Rectangle<T> other)
         {
-            return Contains(other.left, other.top)
-                || Contains(other.left, other.bottom)
-                || Contains(other.right, other.top)
-                || Contains(other.right, other.bottom);
+            return Contains(other.xMin, other.yMin)
+                || Contains(other.xMin, other.yMax)
+                || Contains(other.xMax, other.yMin)
+                || Contains(other.xMax, other.yMax);
         }
 
         public bool Overlaps(Rectangle<T> other)
