@@ -3,6 +3,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using AdventOfCodeTools;
 
 namespace AdventOfCode
 {
@@ -16,7 +17,7 @@ namespace AdventOfCode
 
         public static string Part1()
         {
-            var lines = Utils.GetLines(".\\Day7\\Input.txt");
+            var lines = IO.GetStringLines(@"Day7\Input.txt");
 
             var nodes = Parse(lines);
             var freeNodes = GetRootNodes(nodes);
@@ -42,7 +43,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day7\\Input.txt");
+            var lines = IO.GetStringLines(@"Day7\Input.txt");
             var nbWorkers = 5;
 
             var nodes = Parse(lines);

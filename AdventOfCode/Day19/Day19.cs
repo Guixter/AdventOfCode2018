@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace AdventOfCode
 
         public static long Part1()
         {
-            var lines = Utils.GetLines(".\\Day19\\Input.txt");
+            var lines = IO.GetStringLines(@"Day19\Input.txt");
 
             Command.Parse(lines, out var binding, out var commands);
             var registers = new long[6];
@@ -27,7 +28,7 @@ namespace AdventOfCode
 
         public static long Part2()
         {
-            var lines = Utils.GetLines(".\\Day19\\Input.txt");
+            var lines = IO.GetStringLines(@"Day19\Input.txt");
 
             Command.Parse(lines, out var binding, out var commands);
             var registers = new long[6] { 1, 0, 0, 0, 0, 0 };

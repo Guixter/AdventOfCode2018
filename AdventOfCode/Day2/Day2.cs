@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Linq;
 
 namespace AdventOfCode
@@ -15,7 +16,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day2\\Input.txt");
+            var lines = IO.GetStringLines(@"Day2\Input.txt");
 
             var twoOccurences = 0;
             var threeOccurences = 0;
@@ -37,7 +38,7 @@ namespace AdventOfCode
 
         public static string Part2()
         {
-            var lines = Utils.GetLines(".\\Day2\\Input.txt");
+            var lines = IO.GetStringLines(@"Day2\Input.txt");
 
             for (var i = 0 ; i < lines.Length; i++)
             {

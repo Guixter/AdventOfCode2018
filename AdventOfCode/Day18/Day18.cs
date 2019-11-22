@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,14 +17,14 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day18\\Input.txt");
+            var lines = IO.GetStringLines(@"Day18\Input.txt");
             var grid = ComputeStraight(lines, 10);
             return ComputeProduct(grid);
         }
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day18\\Input.txt");
+            var lines = IO.GetStringLines(@"Day18\Input.txt");
             var grid = ComputeWithCycleDetection(lines, 1000000000, 50);
             return ComputeProduct(grid);
         }

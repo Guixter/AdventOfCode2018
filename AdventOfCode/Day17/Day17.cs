@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,14 +21,14 @@ namespace AdventOfCode
 
         public static void Run()
         {
-            //Program.SetOutputFile(".\\Day17\\Output.txt");
+            //IO.SetOutputFile(@"Day17\Output.txt");
             Console.WriteLine(Part1());
             Console.WriteLine(Part2());
         }
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day17\\Input.txt");
+            var lines = IO.GetStringLines(@"Day17\Input.txt");
 
             var clays = ParseClays(lines);
             var grid = Grid.Build(clays, waterSpring);
@@ -43,7 +44,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day17\\Input.txt");
+            var lines = IO.GetStringLines(@"Day17\Input.txt");
 
             var clays = ParseClays(lines);
             var grid = Grid.Build(clays, waterSpring);

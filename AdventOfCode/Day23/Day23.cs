@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day23\\Input.txt");
+            var lines = IO.GetStringLines(@"Day23\Input.txt");
 
             var bots = Bot.Parse(lines);
 
@@ -31,7 +32,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day23\\Input.txt");
+            var lines = IO.GetStringLines(@"Day23\Input.txt");
 
             var bots = Bot.Parse(lines);
             var box = ComputeBestBox(bots);

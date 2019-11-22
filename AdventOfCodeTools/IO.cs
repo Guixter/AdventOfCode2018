@@ -13,15 +13,16 @@ namespace AdventOfCodeTools
     public class IO
     {
 
-        public static IEnumerable<string> GetStringLines(string pathFromSolution)
+        public static string[] GetStringLines(string pathFromSolution)
         {
             return File.ReadAllLines($@"..\..\{pathFromSolution}");
         }
 
-        public static IEnumerable<int> GetIntLines(string pathFromSolution)
+        public static int[] GetIntLines(string pathFromSolution)
         {
             return GetStringLines(pathFromSolution)
-                .Select(x => int.Parse(x));
+                .Select(x => int.Parse(x))
+                .ToArray();
         }
 
         public static void SetOutputFile(string pathFromSolutionRoot)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day24\\Input.txt");
+            var lines = IO.GetStringLines(@"Day24\Input.txt");
             Army.Parse(lines, out var immune, out var infection);
 
             var winner = ComputeAllFights(immune, infection);
@@ -28,7 +29,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day24\\Input.txt");
+            var lines = IO.GetStringLines(@"Day24\Input.txt");
             Army.Parse(lines, out var immune, out var infection);
 
             var boost = 0;

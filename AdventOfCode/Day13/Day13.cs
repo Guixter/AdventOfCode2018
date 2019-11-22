@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,7 +16,7 @@ namespace AdventOfCode
 
         public static string Part1()
         {
-            var lines = Utils.GetLines(".\\Day13\\Input.txt");
+            var lines = IO.GetStringLines(@"Day13\Input.txt");
             ParseTracks(lines, out var grid, out var carts);
 
             Tile crashTile = null;
@@ -28,7 +29,7 @@ namespace AdventOfCode
 
         public static string Part2()
         {
-            var lines = Utils.GetLines(".\\Day13\\Input.txt");
+            var lines = IO.GetStringLines(@"Day13\Input.txt");
             ParseTracks(lines, out var grid, out var carts);
 
             IEnumerable<Cart> aliveCarts = carts;

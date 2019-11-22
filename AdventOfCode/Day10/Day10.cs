@@ -3,6 +3,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using AdventOfCodeTools;
 
 namespace AdventOfCode
 {
@@ -15,7 +16,7 @@ namespace AdventOfCode
 
         public static int Part1_2()
         {
-            var lines = Utils.GetLines(".\\Day10\\Input.txt");
+            var lines = IO.GetStringLines(@"Day10\Input.txt");
 
             var stars = new Star[lines.Length];
             for (var i = 0; i < lines.Length; i++)

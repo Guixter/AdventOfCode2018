@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day22\\Input.txt");
+            var lines = IO.GetStringLines(@"Day22\Input.txt");
             var grid = Grid.Parse(lines);
             grid.ComputeTiles(0, grid.targetX, 0, grid.targetY);
             //grid.Print();
@@ -29,7 +30,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day22\\Input.txt");
+            var lines = IO.GetStringLines(@"Day22\Input.txt");
             var grid = Grid.Parse(lines);
 
             var result = grid.ComputeShortestPath(1, 7);

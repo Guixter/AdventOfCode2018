@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,7 +19,7 @@ namespace AdventOfCode
 
         public static long Part1()
         {
-            var lines = Utils.GetLines(".\\Day12\\Input.txt");
+            var lines = IO.GetStringLines(@"Day12\Input.txt");
             var nbGenerations = 20;
 
             return ComputePlantSum(lines, nbGenerations);
@@ -26,7 +27,7 @@ namespace AdventOfCode
 
         public static long Part2()
         {
-            var lines = Utils.GetLines(".\\Day12\\Input.txt");
+            var lines = IO.GetStringLines(@"Day12\Input.txt");
             var nbGenerations = 50000000000;
 
             return ComputePlantSum(lines, nbGenerations);

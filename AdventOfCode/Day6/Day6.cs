@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +15,7 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day6\\Input.txt");
+            var lines = IO.GetStringLines(@"Day6\Input.txt");
 
             // Parse the points
             var nbPoints = lines.Length;
@@ -88,7 +89,7 @@ namespace AdventOfCode
 
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day6\\Input.txt");
+            var lines = IO.GetStringLines(@"Day6\Input.txt");
             var maximumDistanceSum = 10000;
 
             var nbPoints = lines.Length;
