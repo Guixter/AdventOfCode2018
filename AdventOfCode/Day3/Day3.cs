@@ -1,12 +1,15 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Rect = AdventOfCodeTools.Rectangle<int>;
 
 namespace AdventOfCode
 {
     class Day3
     {
+        private static readonly Regex regex = new Regex(@"#(\d*) @ (\d*),(\d*): (\d*)x(\d*)");
 
         public static void Run()
         {
@@ -16,16 +19,16 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day3\\Input.txt");
+            var lines = IO.GetStringLines(@"Day3\Input.txt");
 
             var maxSize = 1000;
             var matrix = new int[maxSize * maxSize];
             foreach (var line in lines)
             {
-                var rect = Rect.Parse(line);
-                for (var i = rect.left; i <= rect.Right; i++)
+                var rect = ParseRectangle(line);
+                for (var i = (int) rect.left; i <= rect.right; i++)
                 {
-                    for (var j = rect.top; j <= rect.Bottom; j++)
+                    for (var j = (int) rect.top; j <= rect.bottom; j++)
                     {
                         matrix[i * maxSize + j]++;
                     }
@@ -35,15 +38,28 @@ namespace AdventOfCode
             return matrix.Where(x => x > 1).Count();
         }
 
+        public static Rect ParseRectangle(string line)
+        {
+            var values = IO.Match(regex, line);
+            return new Rect
+            {
+                meta = int.Parse(values[0]),
+                left = int.Parse(values[1]),
+                top = int.Parse(values[2]),
+                width = int.Parse(values[3]),
+                height = int.Parse(values[4]),
+            };
+        }
+
         public static int Part2()
         {
-            var lines = Utils.GetLines(".\\Day3\\Input.txt");
+            var lines = IO.GetStringLines(@"Day3\Input.txt");
 
             var handledRectangles = new HashSet<Rect>();
-            var currentNotOverlapping = new List<Rect>(lines.Length);
+            var currentNotOverlapping = new List<Rect>(lines.Count());
             foreach (var line in lines)
             {
-                var rect = Rect.Parse(line);
+                var rect = ParseRectangle(line);
 
                 currentNotOverlapping.RemoveAll(r => r.Overlaps(rect));
                 if (handledRectangles.Where(r => r.Overlaps(rect)).Count() == 0)
@@ -52,72 +68,7 @@ namespace AdventOfCode
                 handledRectangles.Add(rect);
             }
 
-            return currentNotOverlapping[0].id;
-        }
-
-        private struct Rect
-        {
-            public int id;
-            public int left;
-            public int top;
-            public int width;
-            public int height;
-
-            public int Right
-            {
-                get {
-                    return left + width - 1;
-                }
-            }
-
-            public int Bottom
-            {
-                get {
-                    return top + height - 1;
-                }
-            }
-
-            private static readonly Regex regex = new Regex(@"#(\d*) @ (\d*),(\d*): (\d*)x(\d*)");
-
-            public static Rect Parse(string line)
-            {
-                var match = regex.Match(line);
-                if (match.Success)
-                {
-                    return new Rect() {
-                        id = int.Parse(match.Groups[1].Value),
-                        left = int.Parse(match.Groups[2].Value),
-                        top = int.Parse(match.Groups[3].Value),
-                        width = int.Parse(match.Groups[4].Value),
-                        height = int.Parse(match.Groups[5].Value),
-                    };
-                }
-                else
-                {
-                    return new Rect();
-                }
-            }
-
-            public bool Contains(int i, int j)
-            {
-                return i >= left
-                    && i <= Right
-                    && j >= top
-                    && j <= Bottom;
-            }
-
-            public bool Contains(Rect other)
-            {
-                return Contains(other.left, other.top)
-                    || Contains(other.left, other.Bottom)
-                    || Contains(other.Right, other.top)
-                    || Contains(other.Right, other.Bottom);
-            }
-
-            public bool Overlaps(Rect other)
-            {
-                return Contains(other) || other.Contains(this);
-            }
+            return currentNotOverlapping[0].meta;
         }
     }
 }
