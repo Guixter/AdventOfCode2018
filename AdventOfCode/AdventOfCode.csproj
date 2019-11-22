@@ -101,5 +101,11 @@
     <Content Include="Day8\Input.txt" />
     <Content Include="Day9\Input.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdventOfCodeTools\AdventOfCodeTools.csproj">
+      <Project>{234bd60f-059d-4fd2-ae44-63bfcd4223d0}</Project>
+      <Name>AdventOfCodeTools</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

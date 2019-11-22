@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AdventOfCode
 {
@@ -14,21 +16,14 @@ namespace AdventOfCode
 
         public static int Part1()
         {
-            var lines = Utils.GetLines(".\\Day1\\Input.txt");
-
-            var result = 0;
-            foreach (var line in lines)
-            {
-                result += int.Parse(line);
-            }
-
-            return result;
+            return IO.GetIntLines(@"Day1\Input.txt")
+                .Aggregate(0, (acc, x) => acc + x);
         }
 
         public static int Part2()
         {
             var set = new HashSet<int>();
-            var lines = Utils.GetLines(".\\Day1\\Input.txt");
+            var lines = IO.GetIntLines(@"Day1\Input.txt");
 
             var currentFrequency = 0;
             while(true)
@@ -38,7 +33,7 @@ namespace AdventOfCode
                     if (set.Contains(currentFrequency))
                         return currentFrequency;
                     set.Add(currentFrequency);
-                    currentFrequency += int.Parse(line);
+                    currentFrequency += line;
                 }
             }
         }
