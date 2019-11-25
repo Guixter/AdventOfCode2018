@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCodeTools;
+using System;
 
 namespace AdventOfCode
 {
@@ -26,29 +27,29 @@ namespace AdventOfCode
             var gridSerialNumber = 9306;
             var powerGrid = BuildPowerGrid(gridSerialNumber);
 
-            var totalGrid = new int[gridSize, gridSize];
-            var maxSquareSize = new Tuple<int, int, int, float>(0, 0, 0, float.NegativeInfinity);
+            var totalGrid = new Grid<int>(gridSize, gridSize);
+            var maxSquareSize = (0, 0, 0, float.NegativeInfinity);
             for (var squareSize = 1; squareSize < gridSize; squareSize++)
             {
                 var maxPoint = ComputeMaxPowerSquare(squareSize, gridSerialNumber, powerGrid, totalGrid);
 
                 if (maxPoint.Item3 > maxSquareSize.Item4)
-                    maxSquareSize = new Tuple<int, int, int, float>(maxPoint.Item1, maxPoint.Item2, squareSize, maxPoint.Item3);
+                    maxSquareSize = (maxPoint.Item1, maxPoint.Item2, squareSize, maxPoint.Item3);
             }
 
             return maxSquareSize.Item1 + "," + maxSquareSize.Item2 + "," + maxSquareSize.Item3 + "  -> " + maxSquareSize.Item4;
         }
 
         // Each cell of the total grid contains the total power of the square whose top-left cell is this one
-        private static Tuple<int, int, float> ComputeMaxPowerSquare(int squareSize, int gridSerialNumber, int[,] powerGrid, int[,] totalGrid = null)
+        private static (int, int, float) ComputeMaxPowerSquare(int squareSize, int gridSerialNumber, Grid<int> powerGrid, Grid<int> totalGrid = null)
         {
             var fromScratch = totalGrid == null;
             if (fromScratch)
-                totalGrid = new int[gridSize - squareSize + 1, gridSize - squareSize + 1];
+                totalGrid = new Grid<int>(gridSize - squareSize + 1, gridSize - squareSize + 1);
 
-            var maxPoint = new Tuple<int, int, float>(0, 0, float.NegativeInfinity);
-            var borderX = totalGrid.GetLength(0) - squareSize + 1;
-            var borderY = totalGrid.GetLength(1) - squareSize + 1;
+            var maxPoint = (0, 0, float.NegativeInfinity);
+            var borderX = totalGrid.xLength - squareSize + 1;
+            var borderY = totalGrid.yLength - squareSize + 1;
             for (var i = 0; i < borderX; i++)
             {
                 for (var j = 0; j < borderY; j++)
@@ -57,14 +58,14 @@ namespace AdventOfCode
                     totalGrid[i, j] = power;
 
                     if (power > maxPoint.Item3)
-                        maxPoint = new Tuple<int, int, float>(i + 1, j + 1, totalGrid[i, j]);
+                        maxPoint = (i + 1, j + 1, totalGrid[i, j]);
                 }
             }
 
             return maxPoint;
         }
 
-        private static int ComputeTotalPower(int x, int y, int squareSize, int[,] powerGrid, int[,] lastTotalGrid, bool fromScratch)
+        private static int ComputeTotalPower(int x, int y, int squareSize, Grid<int> powerGrid, Grid<int> lastTotalGrid, bool fromScratch)
         {
             var power = fromScratch ? 0 : lastTotalGrid[x, y];
 
@@ -90,9 +91,9 @@ namespace AdventOfCode
             return power;
         }
 
-        private static int[,] BuildPowerGrid(int gridSerialNumber)
+        private static Grid<int> BuildPowerGrid(int gridSerialNumber)
         {
-            var powerGrid = new int[gridSize, gridSize];
+            var powerGrid = new Grid<int>(gridSize, gridSize);
             for (var i = 0; i < gridSize; i++)
             {
                 for (var j = 0; j < gridSize; j++)
@@ -113,7 +114,7 @@ namespace AdventOfCode
             return power - 5;
         }
 
-        private static void AddPower(int x, int y, int power, int squareSize, int[,] grid)
+        private static void AddPower(int x, int y, int power, int squareSize, Grid<int> grid)
         {
             for (var i = 0; i < squareSize; i++)
             {
@@ -124,21 +125,13 @@ namespace AdventOfCode
             }
         }
 
-        private static void PrintGrid(int[,] grid)
+        private static void PrintGrid(int value, int x, int y)
         {
-            for (int i = 0; i < grid.GetLength(1); i++)
+            var cell = value.ToString();
+            IO.Print(cell);
+            for (var k = cell.Length; k < 4; k++)
             {
-                for (int j = 0; j < grid.GetLength(0); j++)
-                {
-                    var cell = grid[j, i].ToString();
-                    Console.Write(cell);
-                    for (var k = cell.Length; k < 4; k++)
-                    {
-                        Console.Write(" ");
-                    }
-                    
-                }
-                Console.WriteLine();
+                IO.Print(" ");
             }
         }
     }
