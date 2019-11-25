@@ -1,46 +1,31 @@
-﻿namespace AdventOfCodeTools
+﻿using Unity.Mathematics;
+
+namespace AdventOfCodeTools
 {
-    public struct Rectangle<T>
+    public struct Rectangle
     {
-        public float xMin;
-        public float yMin;
-        public float xLength;
-        public float yLength;
-        public T meta;
+        public float2 min;
+        public float2 length;
 
-        public float xMax
+        public float2 max { get => min + length - 1; }
+
+        public bool Contains(float2 point)
         {
-            get => xMin + xLength - 1;
+            return point.x >= min.x
+                && point.x <= max.x
+                && point.y >= min.y
+                && point.y <= max.y;
         }
 
-
-        public float yMax
+        public bool Contains(Rectangle other)
         {
-            get => yMin + yLength - 1;
+            return Contains(MathUtils.Merge(other.min, other.max, new int2(0, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int2(0, 1)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int2(1, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int2(1, 1)));
         }
 
-        public bool Contains(float x, float y)
-        {
-            return x >= xMin
-                && x <= xMax
-                && y >= yMin
-                && y <= yMax;
-        }
-
-        public bool Contains<K>(Point2<K> point)
-        {
-            return Contains(point.x, point.y);
-        }
-
-        public bool Contains(Rectangle<T> other)
-        {
-            return Contains(other.xMin, other.yMin)
-                || Contains(other.xMin, other.yMax)
-                || Contains(other.xMax, other.yMin)
-                || Contains(other.xMax, other.yMax);
-        }
-
-        public bool Overlaps(Rectangle<T> other)
+        public bool Overlaps(Rectangle other)
         {
             return Contains(other) || other.Contains(this);
         }

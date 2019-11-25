@@ -1,58 +1,37 @@
-﻿namespace AdventOfCodeTools
+﻿using Unity.Mathematics;
+
+namespace AdventOfCodeTools
 {
-    public struct Box<T>
+    public struct Box
     {
-        public float xMin;
-        public float yMin;
-        public float zMin;
-        public float xLength;
-        public float yLength;
-        public float zLength;
-        public T meta;
+        public float3 min;
+        public float3 length;
 
-        public float xMax
+        public float3 max { get => min + length - 1; }
+
+        public bool Contains(float3 point)
         {
-            get => xMin + xLength - 1;
+            return point.x >= min.x
+                && point.x <= max.x
+                && point.y >= min.y
+                && point.y <= max.y
+                && point.z >= min.z
+                && point.z <= max.z;
         }
 
-        public float yMax
+        public bool Contains(Box other)
         {
-            get => yMin + yLength - 1;
+            return Contains(MathUtils.Merge(other.min, other.max, new int3(0, 0, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 0, 1)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 1, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 1, 1)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 0, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 0, 1)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 1, 0)))
+                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 1, 1)));
         }
 
-        public float zMax
-        {
-            get => zMin + zLength - 1;
-        }
-
-        public bool Contains(float x, float y, float z)
-        {
-            return x >= xMin
-                && x <= xMax
-                && y >= yMin
-                && y <= yMax
-                && z >= zMin
-                && z <= zMax;
-        }
-
-        public bool Contains<K>(Point3<K> point)
-        {
-            return Contains(point.x, point.y, point.z);
-        }
-
-        public bool Contains(Box<T> other)
-        {
-            return Contains(other.xMin, other.yMin, other.zMin)
-                || Contains(other.xMin, other.yMax, other.zMin)
-                || Contains(other.xMax, other.yMin, other.zMin)
-                || Contains(other.xMax, other.yMax, other.zMin)
-                || Contains(other.xMin, other.yMin, other.zMax)
-                || Contains(other.xMin, other.yMax, other.zMax)
-                || Contains(other.xMax, other.yMin, other.zMax)
-                || Contains(other.xMax, other.yMax, other.zMax);
-        }
-
-        public bool Overlaps(Box<T> other)
+        public bool Overlaps(Box other)
         {
             return Contains(other) || other.Contains(this);
         }
