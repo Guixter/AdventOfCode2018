@@ -26,14 +26,14 @@ namespace AdventOfCodeTools
             Console.ResetColor();
         }
 
-        public static string[] GetStringLines(string pathFromSolution)
+        public static string[] GetStringLines(string pathFromDaysFolder)
         {
-            return File.ReadAllLines($@"..\..\{pathFromSolution}");
+            return File.ReadAllLines($@"..\..\Days\{pathFromDaysFolder}");
         }
 
-        public static int[] GetIntLines(string pathFromSolution)
+        public static int[] GetIntLines(string pathFromDaysFolder)
         {
-            return GetStringLines(pathFromSolution)
+            return GetStringLines(pathFromDaysFolder)
                 .Select(x => int.Parse(x))
                 .ToArray();
         }
