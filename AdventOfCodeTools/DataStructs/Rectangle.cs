@@ -9,6 +9,12 @@ namespace AdventOfCodeTools
 
         public float2 max { get => min + length - 1; }
 
+        public Rectangle(float2 min, float2 length)
+        {
+            this.min = min;
+            this.length = length;
+        }
+
         public bool Contains(float2 point)
         {
             return point.x >= min.x

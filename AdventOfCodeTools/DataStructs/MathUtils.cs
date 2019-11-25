@@ -14,6 +14,16 @@ namespace AdventOfCodeTools
             return left * merger + right * (1 - merger);
         }
 
+        public static bool All(this bool3 values)
+        {
+            return values.x && values.y && values.z;
+        }
+
+        public static bool All(this bool2 values)
+        {
+            return values.x && values.y;
+        }
+
         public static float ManhattanDistance(float3 left, float3 right)
         {
             var delta = left - right;

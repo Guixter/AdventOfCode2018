@@ -9,6 +9,12 @@ namespace AdventOfCodeTools
 
         public float3 max { get => min + length - 1; }
 
+        public Box(float3 min, float3 length)
+        {
+            this.min = min;
+            this.length = length;
+        }
+
         public bool Contains(float3 point)
         {
             return point.x >= min.x

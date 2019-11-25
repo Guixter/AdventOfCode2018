@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using AdventOfCodeTools;
+using Unity.Mathematics;
 
 namespace AdventOfCode
 {
@@ -25,47 +26,42 @@ namespace AdventOfCode
             }
 
             var second = 0;
-            var lastBox = new Box() {
-                deltaX = float.PositiveInfinity,
-                deltaY = float.PositiveInfinity,
-            };
+            var lastBox = new Rectangle(
+                new float2(1, 1) * float.NegativeInfinity,
+                new float2(1, 1) * float.PositiveInfinity
+            );
+
             while (true)
             {
-                var box = ComputeBoxSize(stars, second);
-                if (box.deltaX > lastBox.deltaX || box.deltaY > lastBox.deltaY)
+                var rectangle = ComputeRectangle(stars, second);
+                if ((rectangle.length > lastBox.length).All())
                 {
                     Display(stars, second - 1, lastBox);
                     break;
                 }
 
-                lastBox = box;
+                lastBox = rectangle;
                 second++;
             }
 
             return second - 1;
         }
 
-        private static void Display(Star[] stars, int second, Box boundingBox)
+        private static void Display(Star[] stars, int second, Rectangle boundingBox)
         {
-            var grid = new bool[(int) boundingBox.deltaX, (int) boundingBox.deltaY];
+            var grid = new Grid<bool>((int) boundingBox.length.x, (int) boundingBox.length.y);
             foreach (var star in stars)
             {
                 star.GetPositionAt(second, out var x, out var y);
-                grid[x - boundingBox.x, y - boundingBox.y] = true;
+                grid[(int) (x - boundingBox.min.x), (int) (y - boundingBox.min.y)] = true;
             }
 
-            for (var i = 0; i < grid.GetLength(1); i++)
-            {
-                for (var j = 0; j < grid.GetLength(0); j++)
-                {
-                    Console.Write(grid[j,i] ? "#" : "'");
-                    Console.Write(" ");
-                }
-                Console.WriteLine();
-            }
+            grid.Print((value, x, y) => {
+                IO.Print(value ? "# " : "' ", value ? ConsoleColor.Green : ConsoleColor.White);
+            });
         }
 
-        private static Box ComputeBoxSize(Star[] stars, int second)
+        private static Rectangle ComputeRectangle(Star[] stars, int second)
         {
             var xMin = float.PositiveInfinity;
             var xMax = float.NegativeInfinity;
@@ -84,14 +80,10 @@ namespace AdventOfCode
                     yMax = y;
             }
 
-            return new Box()
-            {
-                x = (int) xMin,
-                y = (int) yMin,
-                deltaX = (int) (xMax - xMin + 1),
-                deltaY = (int) (yMax - yMin + 1),
-            };
-            
+            return new Rectangle(
+                new float2(xMin, yMin),
+                new float2(xMax - xMin + 1, yMax - yMin + 1)
+            );
         }
 
         private struct Star
@@ -120,14 +112,6 @@ namespace AdventOfCode
                 x = this.x + second * xVelocity;
                 y = this.y + second * yVelocity;
             }
-        }
-
-        private struct Box
-        {
-            public int x;
-            public int y;
-            public float deltaX;
-            public float deltaY;
         }
     }
 }
