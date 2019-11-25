@@ -13,5 +13,17 @@ namespace AdventOfCodeTools
         {
             return left * merger + right * (1 - merger);
         }
+
+        public static float ManhattanDistance(float3 left, float3 right)
+        {
+            var delta = left - right;
+            return math.abs(delta.x) + math.abs(delta.y) + math.abs(delta.z);
+        }
+
+        public static float ManhattanDistance(float2 left, float2 right)
+        {
+            var delta = left - right;
+            return math.abs(delta.x) + math.abs(delta.y);
+        }
     }
 }

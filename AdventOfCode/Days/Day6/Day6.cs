@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 
 namespace AdventOfCode
 {
@@ -28,17 +29,17 @@ namespace AdventOfCode
             GetBoxSize(points, out var width, out var height, out var left, out var top);
 
             // We use a grid of size (width+2,height+2) to include the first external border in the computations
-            var grid = new Cell[width + 2, height + 2];
+            var grid = new Grid<Cell>(width + 2, height + 2);
             var scores = new int[points.Count()];
-            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var i = 0; i < grid.xLength; i++)
             {
-                for (var j = 0; j < grid.GetLength(1); j++)
+                for (var j = 0; j < grid.yLength; j++)
                 {
                     var currentMinDistance = float.PositiveInfinity;
                     var currentClosestPoint = -1;
                     foreach (var point in points)
                     {
-                        var distance = point.ManhattanDistance(i + left - 1, j + top - 1);
+                        var distance = MathUtils.ManhattanDistance(point.pos, new float2(i + left - 1, j + top - 1));
                         if (distance < currentMinDistance)
                         {
                             if (currentClosestPoint != -1)
@@ -54,14 +55,17 @@ namespace AdventOfCode
                             currentClosestPoint = -1;
                         }
                     }
-                    grid[i, j].distanceToClosestPoint = (int) currentMinDistance;
-                    grid[i, j].closestPointId = currentClosestPoint;
+                    grid[i, j] = new Cell
+                    {
+                        distanceToClosestPoint = (int)currentMinDistance,
+                        closestPointId = currentClosestPoint
+                    };
                 }
             }
 
             // Determine the finite points (those who don't appear in the external border)
-            var lastIndexX = grid.GetLength(0) - 1;
-            var lastIndexY = grid.GetLength(1) - 1;
+            var lastIndexX = grid.xLength - 1;
+            var lastIndexY = grid.yLength - 1;
             for (var i = 0; i <= lastIndexX; i++)
             {
                 if (grid[i, 0].closestPointId != -1)
@@ -87,6 +91,22 @@ namespace AdventOfCode
             return finitePoints.OrderByDescending(x => x.Item3).First().Item3;
         }
 
+        private static void Print(Point[] points, Grid<Cell> grid)
+        {
+            grid.Print((Cell cell, int x, int y) =>
+            {
+                if (cell.closestPointId != -1 && MathUtils.ManhattanDistance(points[cell.closestPointId].pos, new float2(x, y)) == 0)
+                    IO.Print((char)(cell.closestPointId + 'A'));
+                else
+                    IO.Print((char)(cell.closestPointId + 'a'));
+            });
+
+            grid.Print((Cell cell, int x, int y) =>
+            {
+                Console.Write(cell.distanceToClosestPoint + "-");
+            });
+        }
+
         public static int Part2()
         {
             var lines = IO.GetStringLines(@"Day6\Input.txt");
@@ -106,7 +126,7 @@ namespace AdventOfCode
             {
                 for (var j = 0; j < height; j++)
                 {
-                    var sum = points.Sum(x => x.ManhattanDistance(i + left, j + top));
+                    var sum = points.Sum(x => MathUtils.ManhattanDistance(x.pos, new float2(i + left, j + top)));
                     if (sum < maximumDistanceSum)
                         nbValidCells++;
                 }
@@ -115,59 +135,27 @@ namespace AdventOfCode
             return nbValidCells;
         }
 
-        private static void Print(Cell[,] grid, Point[] points)
-        {
-            for (var i = 0; i < grid.GetLength(1); i++)
-            {
-                for (var j = 0; j < grid.GetLength(0); j++)
-                {
-                    if (grid[j, i].closestPointId != -1 && points[grid[j, i].closestPointId].ManhattanDistance(j, i) == 0)
-                        Console.Write((char)(grid[j, i].closestPointId + 'A'));
-                    else
-                        Console.Write((char)(grid[j, i].closestPointId + 'a'));
-                }
-                Console.WriteLine();
-            }
-
-            for (var i = 0; i < grid.GetLength(1); i++)
-            {
-                for (var j = 0; j < grid.GetLength(0); j++)
-                {
-                    Console.Write(grid[j, i].distanceToClosestPoint + "-");
-                }
-                Console.WriteLine();
-            }
-        }
-
         private static void GetBoxSize(Point[] points, out int width, out int height, out int left, out int top)
         {
-            left = points.Select(x => x.x).Min();
-            var right = points.Select(x => x.x).Max();
-            top = points.Select(x => x.y).Min();
-            var bottom = points.Select(x => x.y).Max();
+            left = (int) points.Select(x => x.pos.x).Min();
+            var right = (int) points.Select(x => x.pos.x).Max();
+            top = (int) points.Select(x => x.pos.y).Min();
+            var bottom = (int) points.Select(x => x.pos.y).Max();
             width = right - left + 1;
             height = bottom - top + 1;
         }
 
         private struct Point {
-            public int x;
-            public int y;
+            public float2 pos;
             public int id;
             public bool infiniteArea;
-
 
             public void Parse(string line, int id)
             {
                 var coordinates = line.Split(',');
-                x = int.Parse(coordinates[0]);
-                y = int.Parse(coordinates[1]);
+                pos = new float2(int.Parse(coordinates[0]), int.Parse(coordinates[1]));
                 this.id = id;
                 infiniteArea = false;
-            }
-
-            public int ManhattanDistance(int x, int y)
-            {
-                return Math.Abs(x - this.x) + Math.Abs(y - this.y);
             }
         }
 
