@@ -2,10 +2,10 @@
 
 namespace AdventOfCodeTools
 {
+    // TODO more operations with Vector
     public class Grid<T>
     {
         private T[,] m_Grid;
-
         public int xLength { get => m_Grid.GetLength(0); }
         public int yLength { get => m_Grid.GetLength(1); }
 
@@ -26,6 +26,18 @@ namespace AdventOfCodeTools
             return result;
         }
 
+        public void SetXRow(T[] row, VectorInt yList)
+        {
+            for (var index = 0; index < yList.Length; index++)
+            {
+                var y = yList[index];
+                for (var x = 0; x < xLength; x++)
+                {
+                    m_Grid[x, y] = row[x];
+                }
+            }
+        }
+
         public T[] GetYRow(int x)
         {
             var result = new T[yLength];
@@ -36,6 +48,18 @@ namespace AdventOfCodeTools
             }
 
             return result;
+        }
+
+        public void SetYRow(T[] row, VectorInt xList)
+        {
+            for (var index = 0; index < xList.Length; index++)
+            {
+                var x = xList[index];
+                for (var y = 0; y < yLength; y++)
+                {
+                    m_Grid[x, y] = row[y];
+                }
+            }
         }
 
         public T[] Flatten()
@@ -50,6 +74,26 @@ namespace AdventOfCodeTools
                 }
             }
             return flat;
+        }
+
+        public Grid<T> GetSubgrid(VectorInt xList, VectorInt yList)
+        {
+            var nbX = xList.Length;
+            var nbY = yList.Length;
+
+            var result = new Grid<T>(nbX, nbY);
+
+            for (var i = 0; i < nbX; i++)
+            {
+                var x = xList[i];
+                for (var j = 0; j < nbY; j++)
+                {
+                    var y = yList[j];
+                    result[i, j] = this[x, y];
+                }
+            }
+
+            return result;
         }
 
         public T this[int x, int y]
@@ -71,6 +115,11 @@ namespace AdventOfCodeTools
                 }
                 Console.WriteLine();
             }
+        }
+
+        public void Print(bool reverseY = false)
+        {
+            Print((val, x, y) => { IO.Print(val.ToString()); }, reverseY);
         }
     }
 }
