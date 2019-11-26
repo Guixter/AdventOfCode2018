@@ -7,6 +7,7 @@ namespace AdventOfCodeTools
 {
     // TODO :
     // - data structs (matrixes, grids, ...)
+    // - default enums
     // - ** debug tools ** !!!
 
     public class IO

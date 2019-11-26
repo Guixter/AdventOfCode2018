@@ -32,7 +32,7 @@ namespace AdventOfCode
             var lines = IO.GetStringLines(@"Day15\Input.txt");
 
             int i;
-            Tile[,] grid;
+            Grid<Tile> grid;
             List<Unit> units;
             var startingAttack = Unit.defaultAttackPower;
             do
@@ -46,7 +46,7 @@ namespace AdventOfCode
             return i * units.Sum(x => x.hitPoints);
         }
 
-        private static int SimulateFight(string[] lines, out Tile[,] grid, out List<Unit> units, int elvesAttackPower = -1)
+        private static int SimulateFight(string[] lines, out Grid<Tile> grid, out List<Unit> units, int elvesAttackPower = -1)
         {
             ParseGrid(lines, out grid, out units, elvesAttackPower);
 
@@ -59,7 +59,7 @@ namespace AdventOfCode
             return i;
         }
 
-        private static bool ProceedRound(Tile[,] grid, List<Unit> units)
+        private static bool ProceedRound(Grid<Tile> grid, List<Unit> units)
         {
             units.Sort();
 
@@ -72,48 +72,48 @@ namespace AdventOfCode
             return true;
         }
 
-        private static void PrintGrid(Tile[,] grid)
+        private static void PrintGrid(Grid<Tile> grid)
         {
-            for (var i = 0; i < grid.GetLength(1); i++)
+            for (var y = 0; y < grid.yLength; y++)
             {
-                for (var j = 0; j < grid.GetLength(0); j++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    grid[j, i].Print();
+                    grid[x, y].Print();
                 }
                 Console.Write("  ");
-                for (var j = 0; j < grid.GetLength(0); j++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    if (grid[j,i].scoreFlag == -1)
+                    if (grid[x,y].scoreFlag == -1)
                         Console.Write("# ");
                     else
-                        Console.Write(grid[j,i].scoreFlag % 10 + " ");
+                        Console.Write(grid[x,y].scoreFlag % 10 + " ");
                 }
                 Console.Write("  ");
-                for (var j = 0; j < grid.GetLength(0); j++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    if (grid[j,i].unit == null)
+                    if (grid[x,y].unit == null)
                         Console.Write("# ");
                     else
-                        Console.Write(grid[j,i].unit.hitPoints % 10 + " ");
+                        Console.Write(grid[x,y].unit.hitPoints % 10 + " ");
                 }
                 Console.WriteLine();
             }
             Console.WriteLine();
         }
 
-        private static void ParseGrid(string[] lines, out Tile[,] grid, out List<Unit> units, int elvesAttackPower = -1)
+        private static void ParseGrid(string[] lines, out Grid<Tile> grid, out List<Unit> units, int elvesAttackPower = -1)
         {
             units = new List<Unit>();
-            grid = new Tile[lines[0].Length, lines.Length];
+            grid = new Grid<Tile>(lines[0].Length, lines.Length);
 
-            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var x = 0; x < grid.xLength; x++)
             {
-                for (var j = 0; j < grid.GetLength(1); j++)
+                for (var y = 0; y < grid.yLength; y++)
                 {
-                    var character = lines[j][i];
-                    grid[i, j] = Tile.Parse(character, i, j);
+                    var character = lines[y][x];
+                    grid[x, y] = Tile.Parse(character, x, y);
 
-                    var unit = Unit.Parse(character, i, j, grid[i,j], elvesAttackPower);
+                    var unit = Unit.Parse(character, x, y, grid[x,y], elvesAttackPower);
                     if (unit != null)
                         units.Add(unit);
                 }
@@ -135,16 +135,16 @@ namespace AdventOfCode
                 return Math.Abs(x - tile.x) + Math.Abs(y - tile.y);
             }
 
-            public IEnumerable<Tile> GetAdjacentSquares(Tile[,] grid)
+            public IEnumerable<Tile> GetAdjacentSquares(Grid<Tile> grid)
             {
                 var tiles = new List<Tile>();
                 if (x > 0)
                     tiles.Add(grid[x - 1, y]);
-                if (x < grid.GetLength(0) - 1)
+                if (x < grid.xLength - 1)
                     tiles.Add(grid[x + 1, y]);
                 if (y > 0)
                     tiles.Add(grid[x, y - 1]);
-                if (y < grid.GetLength(1) - 1)
+                if (y < grid.yLength - 1)
                     tiles.Add(grid[x, y + 1]);
 
                 return tiles;
@@ -158,14 +158,14 @@ namespace AdventOfCode
                 }
             }
 
-            public static void ComputeDistances(Tile[,] grid, Tile from)
+            public static void ComputeDistances(Grid<Tile> grid, Tile from)
             {
                 // Initialization
-                for (var i = 0; i < grid.GetLength(0); i++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    for (var j = 0; j < grid.GetLength(1); j++)
+                    for (var y = 0; y < grid.yLength; y++)
                     {
-                        grid[i, j].scoreFlag = -1;
+                        grid[x, y].scoreFlag = -1;
                     }
                 }
 
@@ -250,7 +250,7 @@ namespace AdventOfCode
             public static readonly int defaultAttackPower = 3;
 
             // Return false when the fight ends
-            public bool TakeTurn(Tile[,] grid, List<Unit> units)
+            public bool TakeTurn(Grid<Tile> grid, List<Unit> units)
             {
                 if (!dead)
                 {
@@ -269,7 +269,7 @@ namespace AdventOfCode
             }
 
             // Return false when there is no enemy target
-            private bool IdentifyTargets(Tile[,] grid, List<Unit> units)
+            private bool IdentifyTargets(Grid<Tile> grid, List<Unit> units)
             {
                 possibleTargets = units
                     .Where(x => !x.dead && x.type != type);
@@ -277,7 +277,7 @@ namespace AdventOfCode
             }
 
             // Return false when there is no in range square
-            private bool ComputeInRangeSquares(Tile[,] grid, List<Unit> units)
+            private bool ComputeInRangeSquares(Grid<Tile> grid, List<Unit> units)
             {
                 inRangeSquares = possibleTargets
                     .Select(t => t.tile.GetAdjacentSquares(grid))
@@ -286,7 +286,7 @@ namespace AdventOfCode
                 return inRangeSquares.Count() > 0;
             }
 
-            private bool IsInRange(Tile[,] grid, List<Unit> units)
+            private bool IsInRange(Grid<Tile> grid, List<Unit> units)
             {
                 return inRangeSquares
                     .Where(s => s.unit == this)
@@ -294,7 +294,7 @@ namespace AdventOfCode
             }
 
             // Return false when there is no reachable square
-            private bool Move(Tile[,] grid, List<Unit> units)
+            private bool Move(Grid<Tile> grid, List<Unit> units)
             {
                 Tile.ComputeDistances(grid, tile);
 
@@ -329,7 +329,7 @@ namespace AdventOfCode
                 return nearSquares.First();
             }
 
-            private void PerformStepTowards(Tile[,] grid, Tile target)
+            private void PerformStepTowards(Grid<Tile> grid, Tile target)
             {
                 if (target.scoreFlag > 0)
                 {
@@ -360,7 +360,7 @@ namespace AdventOfCode
                 tile = target;
             }
 
-            private void Attack(Tile[,] grid, List<Unit> units)
+            private void Attack(Grid<Tile> grid, List<Unit> units)
             {
                 var adjacentTargetsSquares = tile
                     .GetAdjacentSquares(grid)

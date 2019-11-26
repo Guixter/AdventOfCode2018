@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AdventOfCodeTools
 {
@@ -40,12 +38,28 @@ namespace AdventOfCodeTools
             return result;
         }
 
+        public T[] Flatten()
+        {
+            var flat = new T[xLength * yLength];
+
+            for (var x = 0; x < xLength; x++)
+            {
+                for (var y = 0; y < yLength; y++)
+                {
+                    flat[x * yLength + y] = m_Grid[x, y];
+                }
+            }
+            return flat;
+        }
+
         public T this[int x, int y]
         {
             get => m_Grid[x, y];
             set => m_Grid[x, y] = value;
         }
 
+        // TODO compute sub grids
+        // TODO improve the perf by using string builder ?
         public void Print(Action<T, int, int> cellPrinter, bool reverseY = false)
         {
             for (var y = 0; y < yLength; y++)

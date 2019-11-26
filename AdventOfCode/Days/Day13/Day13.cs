@@ -41,7 +41,7 @@ namespace AdventOfCode
             return aliveCarts.First().x + "," + aliveCarts.First().y;
         }
 
-        private static void ComputeTic(Tile[,] grid, List<Cart> carts, out Tile crashTile)
+        private static void ComputeTic(Grid<Tile> grid, List<Cart> carts, out Tile crashTile)
         {
             carts.Sort();
 
@@ -53,70 +53,58 @@ namespace AdventOfCode
             }
         }
 
-        private static void Print(Tile[,] grid)
+        private static void ParseTracks(string[] lines, out Grid<Tile> grid, out List<Cart> carts)
         {
-            for (var i = 0; i < grid.GetLength(1); i++)
-            {
-                for (var j = 0; j < grid.GetLength(0); j++)
-                {
-                    grid[j, i].Print();
-                }
-                Console.WriteLine();
-            }
-        }
-
-        private static void ParseTracks(string[] lines, out Tile[,] grid, out List<Cart> carts)
-        {
-            grid = new Tile[lines[0].Length, lines.Length];
+            grid = new Grid<Tile>(lines[0].Length, lines.Length);
             carts = new List<Cart>();
 
-            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var x = 0; x < grid.xLength; x++)
             {
-                for (var j = 0; j < grid.GetLength(1); j++)
+                for (var y = 0; y < grid.yLength; y++)
                 {
-                    var character = lines[j][i];
+                    var character = lines[y][x];
                     Cart cart;
                     switch (character)
                     {
                         case '^':
-                            cart = new Cart(i, j, Cart.Direction.UP);
+                            cart = new Cart(x, y, Cart.Direction.UP);
                             carts.Add(cart);
-                            grid[i, j] = new Tile(i, j, Tile.Type.VERTICAL, cart);
+                            grid[x, y] = new Tile(x, y, Tile.Type.VERTICAL, cart);
                             break;
                         case 'v':
-                            cart = new Cart(i, j, Cart.Direction.DOWN);
+                            cart = new Cart(x, y, Cart.Direction.DOWN);
                             carts.Add(cart);
-                            grid[i, j] = new Tile(i, j, Tile.Type.VERTICAL, cart);
+                            grid[x, y] = new Tile(x, y, Tile.Type.VERTICAL, cart);
                             break;
                         case '|':
-                            grid[i, j] = new Tile(i, j, Tile.Type.VERTICAL);
+                            grid[x, y] = new Tile(x, y, Tile.Type.VERTICAL);
                             break;
 
                         case '<':
-                            cart = new Cart(i, j, Cart.Direction.LEFT);
+                            cart = new Cart(x, y, Cart.Direction.LEFT);
                             carts.Add(cart);
-                            grid[i, j] = new Tile(i, j, Tile.Type.HORIZONTAL, cart);
+                            grid[x, y] = new Tile(x, y, Tile.Type.HORIZONTAL, cart);
                             break;
                         case '>':
-                            cart = new Cart(i, j, Cart.Direction.RIGHT);
+                            cart = new Cart(x, y, Cart.Direction.RIGHT);
                             carts.Add(cart);
-                            grid[i, j] = new Tile(i, j, Tile.Type.HORIZONTAL, cart);
+                            grid[x, y] = new Tile(x, y, Tile.Type.HORIZONTAL, cart);
                             break;
                         case '-':
-                            grid[i, j] = new Tile(i, j, Tile.Type.HORIZONTAL);
+                            grid[x, y] = new Tile(x, y, Tile.Type.HORIZONTAL);
                             break;
 
                         case '/':
-                            grid[i, j] = new Tile(i, j, Tile.Type.TL_BR_CURVE);
+                            grid[x, y] = new Tile(x, y, Tile.Type.TL_BR_CURVE);
                             break;
                         case '\\':
-                            grid[i, j] = new Tile(i, j, Tile.Type.BL_TR_CURVE);
+                            grid[x, y] = new Tile(x, y, Tile.Type.BL_TR_CURVE);
                             break;
                         case '+':
-                            grid[i, j] = new Tile(i, j, Tile.Type.INTERSECTION);
+                            grid[x, y] = new Tile(x, y, Tile.Type.INTERSECTION);
                             break;
                         default:
-                            grid[i, j] = new Tile(i, j, Tile.Type.VOID);
+                            grid[x, y] = new Tile(x, y, Tile.Type.VOID);
                             break;
                     }
                 }
@@ -140,7 +128,7 @@ namespace AdventOfCode
                 this.direction = direction;
             }
 
-            public bool Move(Tile[,] grid, out Tile crashTile)
+            public bool Move(Grid<Tile> grid, out Tile crashTile)
             {
                 if (crashed)
                 {
@@ -172,7 +160,7 @@ namespace AdventOfCode
                 }
             }
 
-            private Tile GetNextTile(Tile[,] grid)
+            private Tile GetNextTile(Grid<Tile> grid)
             {
                 switch (direction)
                 {

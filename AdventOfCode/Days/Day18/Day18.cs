@@ -29,7 +29,7 @@ namespace AdventOfCode
             return ComputeProduct(grid);
         }
 
-        private static Tile[,] ComputeStraight(string[] lines, int nbMinutes)
+        private static Grid<Tile> ComputeStraight(string[] lines, int nbMinutes)
         {
             var grid = ParseGrid(lines);
 
@@ -41,7 +41,7 @@ namespace AdventOfCode
             return grid;
         }
 
-        private static Tile[,] ComputeWithCycleDetection(string[] lines, long nbMinutes, int cycleDetectionCacheSize)
+        private static Grid<Tile> ComputeWithCycleDetection(string[] lines, long nbMinutes, int cycleDetectionCacheSize)
         {
             var grid = ParseGrid(lines);
 
@@ -86,39 +86,39 @@ namespace AdventOfCode
             return grid;
         }
 
-        private static Tile[,] ComputeStep(Tile[,] current)
+        private static Grid<Tile> ComputeStep(Grid<Tile> current)
         {
-            var newGrid = new Tile[current.GetLength(0), current.GetLength(1)];
+            var newGrid = new Grid<Tile>(current.xLength, current.yLength);
 
-            for (var i = 0; i < current.GetLength(0); i++)
+            for (var x = 0; x < current.xLength; x++)
             {
-                for (var j = 0; j < current.GetLength(1); j++)
+                for (var y = 0; y < current.yLength; y++)
                 {
-                    newGrid[i, j] = current[i, j].ComputeStep(current);
+                    newGrid[x, y] = current[x, y].ComputeStep(current);
                 }
             }
 
             return newGrid;
         }
 
-        private static Tile[,] ParseGrid(string[] lines)
+        private static Grid<Tile> ParseGrid(string[] lines)
         {
-            var result = new Tile[lines.Length, lines[0].Length];
+            var result = new Grid<Tile>(lines.Length, lines[0].Length);
 
-            for (var i = 0; i < result.GetLength(0); i++)
+            for (var x = 0; x < result.xLength; x++)
             {
-                for (var j = 0; j < result.GetLength(1); j++)
+                for (var y = 0; y < result.yLength; y++)
                 {
-                    result[i, j] = Tile.Parse(lines[i][j], i, j);
+                    result[x, y] = Tile.Parse(lines[x][y], x, y);
                 }
             }
 
             return result;
         }
 
-        private static int ComputeProduct(Tile[,] grid)
+        private static int ComputeProduct(Grid<Tile> grid)
         {
-            var flat = Utils.Flatten(grid);
+            var flat = grid.Flatten();
             var nbTrees = flat
                 .Where(x => x.type == Tile.Type.Tree)
                 .Count();
@@ -128,14 +128,14 @@ namespace AdventOfCode
             return nbTrees * nbLumberyards;
         }
 
-        private static void PrintGrid(Tile[,] grid)
+        private static void PrintGrid(Grid<Tile> grid)
         {
             var builder = new StringBuilder();
-            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var x = 0; x < grid.xLength; x++)
             {
-                for (var j = 0; j < grid.GetLength(1); j++)
+                for (var y = 0; y < grid.yLength; y++)
                 {
-                    builder.Append(grid[i, j].Print());
+                    builder.Append(grid[x, y].Print());
                 }
                 builder.AppendLine();
             }
@@ -145,20 +145,20 @@ namespace AdventOfCode
         }
 
         // Compute a signature to easily compare two steps
-        private static string ComputeSignature(Tile[,] grid)
+        private static string ComputeSignature(Grid<Tile> grid)
         {
             var builder = new StringBuilder();
 
-            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var x = 0; x < grid.xLength; x++)
             {
                 var nbOpen = 0;
                 var nbTrees = 0;
 
-                for (var j = 0; j < grid.GetLength(1); j++)
+                for (var y = 0; y < grid.yLength; y++)
                 {
-                    if (grid[i,j].type == Tile.Type.Open)
+                    if (grid[x,y].type == Tile.Type.Open)
                         nbOpen++;
-                    if (grid[i,j].type == Tile.Type.Tree)
+                    if (grid[x,y].type == Tile.Type.Tree)
                         nbTrees++;
                 }
 
@@ -175,7 +175,7 @@ namespace AdventOfCode
             public int x;
             public int y;
 
-            public Tile ComputeStep(Tile[,] current)
+            public Tile ComputeStep(Grid<Tile> current)
             {
                 var result = new Tile() {
                     x = x,
@@ -211,7 +211,7 @@ namespace AdventOfCode
                 return result;
             }
 
-            public IEnumerable<Tile> GetNeighbours(Tile[,] current)
+            public IEnumerable<Tile> GetNeighbours(Grid<Tile> current)
             {
                 var result = new List<Tile>(8);
 
@@ -225,9 +225,9 @@ namespace AdventOfCode
                         var nX = x + i;
                         var nY = y + j;
                         if (nX >= 0
-                            && nX < current.GetLength(0)
+                            && nX < current.xLength
                             && nY >= 0
-                            && nY < current.GetLength(1))
+                            && nY < current.yLength)
                         {
                             result.Add(current[nX, nY]);
                         }

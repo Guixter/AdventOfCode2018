@@ -151,7 +151,7 @@ namespace AdventOfCode
             return newTile;
         }
 
-        private static Room[,] ToGrid(HashSet<Room> allNodes)
+        private static Grid<Room> ToGrid(HashSet<Room> allNodes)
         {
             var xMin = allNodes.Select(x => x.x).Min();
             var xMax = allNodes.Select(x => x.x).Max();
@@ -160,7 +160,7 @@ namespace AdventOfCode
 
             var lengthX = xMax - xMin + 1;
             var lengthY = yMax - yMin + 1;
-            var result = new Room[lengthX, lengthY];
+            var result = new Grid<Room>(lengthX, lengthY);
 
             foreach (var node in allNodes)
             {
@@ -170,35 +170,35 @@ namespace AdventOfCode
             return result;
         }
 
-        private static void Print(Room[,] grid, bool debug = false)
+        private static void Print(Grid<Room> grid, bool debug = false)
         {
             // First row
             Console.Write('#');
-            for (var j = 0; j < grid.GetLength(0); j++)
+            for (var x = 0; x < grid.xLength; x++)
             {
                 Console.Write("##");
             }
             Console.WriteLine();
 
-            for (var i = 0; i < grid.GetLength(1); i++)
+            for (var y = 0; y < grid.yLength; y++)
             {
                 Console.Write('#');
-                for (var j = 0; j < grid.GetLength(0); j++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
                     if (debug)
                     {
-                        Console.Write((int) grid[j, i].distance % 10);
+                        Console.Write((int) grid[x, y].distance % 10);
                     }
                     else
                     {
-                        if (grid[j,i] == null)
+                        if (grid[x,y] == null)
                             Console.Write('#');
-                        else if (grid[j,i].x == 0 && grid[j,i].y == 0)
+                        else if (grid[x,y].x == 0 && grid[x,y].y == 0)
                             Console.Write('X');
                         else
                             Console.Write('.');
                     }
-                    if (grid[j, i] != null && grid[j,i].east != null)
+                    if (grid[x, y] != null && grid[x,y].east != null)
                     {
                         Console.Write('|');
                     }
@@ -210,9 +210,9 @@ namespace AdventOfCode
                 Console.WriteLine();
 
                 Console.Write('#');
-                for (var j = 0; j < grid.GetLength(0); j++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    if (grid[j, i] != null && grid[j, i].south != null)
+                    if (grid[x, y] != null && grid[x, y].south != null)
                     {
                         Console.Write('-');
                     }

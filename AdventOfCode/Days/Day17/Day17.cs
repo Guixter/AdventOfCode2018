@@ -307,7 +307,7 @@ namespace AdventOfCode
 
         private class Grid
         {
-            public Tile[,] values;
+            public Grid<Tile> values;
             public int x;
             public int y;
 
@@ -332,17 +332,17 @@ namespace AdventOfCode
                 var finalX = Math.Min(waterSpring.x, xMin);
                 var finalY = Math.Min(waterSpring.y, yMin);
 
-                var grid = new Tile[xMax - finalX + 3, yMax - finalY + 1];
+                var grid = new Grid<Tile>(xMax - finalX + 3, yMax - finalY + 1);
 
                 // Init the grid
-                for (var i = 0; i < grid.GetLength(0); i++)
+                for (var x = 0; x < grid.xLength; x++)
                 {
-                    for (var j = 0; j < grid.GetLength(1); j++)
+                    for (var y = 0; y < grid.yLength; y++)
                     {
-                        grid[i, j] = new Tile() {
+                        grid[x, y] = new Tile() {
                             type = Tile.Type.Sand,
-                            x = i + finalX - 1,
-                            y = j + finalY,
+                            x = x + finalX - 1,
+                            y = y + finalY,
                         };
                     }
                 }
@@ -367,9 +367,9 @@ namespace AdventOfCode
             public Tile Get(int x, int y)
             {
                 if (x - this.x < -1
-                    || x - this.x >= values.GetLength(0) - 1
+                    || x - this.x >= values.xLength - 1
                     || y - this.y < 0
-                    || y - this.y >= values.GetLength(1))
+                    || y - this.y >= values.yLength)
                 {
                     return null;
                 }
@@ -383,10 +383,10 @@ namespace AdventOfCode
 
             public Tile[] Flatten()
             {
-                var xSize = values.GetLength(0);
+                var xSize = values.xLength;
 
                 var nbUselessY = minClayY - y;
-                var ySize = values.GetLength(1) - nbUselessY;
+                var ySize = values.yLength - nbUselessY;
                 var flat = new Tile[xSize * ySize];
 
                 for (var i = 0; i < xSize; i++)
@@ -405,10 +405,10 @@ namespace AdventOfCode
                 Console.CursorTop = 0;
 
                 var xMin = radius == -1 ? 0 : Math.Max(current.x - radius - x, 0);
-                var xMax = radius == -1 ? values.GetLength(0) : Math.Min(current.x + radius - x, values.GetLength(0));
+                var xMax = radius == -1 ? values.xLength : Math.Min(current.x + radius - x, values.xLength);
 
                 var yMin = radius == -1 ? y : Math.Max(current.y - radius - y, 0);
-                var yMax = radius == -1 ? values.GetLength(1) : Math.Min(current.y + radius - y, values.GetLength(1));
+                var yMax = radius == -1 ? values.yLength : Math.Min(current.y + radius - y, values.yLength);
                 var builder = new StringBuilder();
                 builder.Append("  ");
                 for (var j = xMin; j < xMax; j++)

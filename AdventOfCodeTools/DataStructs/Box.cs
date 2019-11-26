@@ -27,14 +27,14 @@ namespace AdventOfCodeTools
 
         public bool Contains(Box other)
         {
-            return Contains(MathUtils.Merge(other.min, other.max, new int3(0, 0, 0)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 0, 1)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 1, 0)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(0, 1, 1)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 0, 0)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 0, 1)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 1, 0)))
-                || Contains(MathUtils.Merge(other.min, other.max, new int3(1, 1, 1)));
+            return Contains(math.lerp(other.min, other.max, new int3(0, 0, 0)))
+                || Contains(math.lerp(other.min, other.max, new int3(0, 0, 1)))
+                || Contains(math.lerp(other.min, other.max, new int3(0, 1, 0)))
+                || Contains(math.lerp(other.min, other.max, new int3(0, 1, 1)))
+                || Contains(math.lerp(other.min, other.max, new int3(1, 0, 0)))
+                || Contains(math.lerp(other.min, other.max, new int3(1, 0, 1)))
+                || Contains(math.lerp(other.min, other.max, new int3(1, 1, 0)))
+                || Contains(math.lerp(other.min, other.max, new int3(1, 1, 1)));
         }
 
         public bool Overlaps(Box other)
