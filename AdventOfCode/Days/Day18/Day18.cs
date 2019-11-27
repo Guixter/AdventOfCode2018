@@ -118,7 +118,7 @@ namespace AdventOfCode
 
         private static int ComputeProduct(Grid<Tile> grid)
         {
-            var flat = grid.Flatten();
+            var flat = grid.ToArray();
             var nbTrees = flat
                 .Where(x => x.type == Tile.Type.Tree)
                 .Count();

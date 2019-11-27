@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 namespace AdventOfCodeTools
 {
     // TODO :
-    // - data structs (matrixes, grids, ...)
-    // - default enums
     // - ** debug tools ** !!!
 
     public class IO
@@ -18,6 +16,14 @@ namespace AdventOfCodeTools
             Console.BackgroundColor = background;
             Console.Write(text);
             Console.ResetColor();
+        }
+
+        public static void PrintMultiple(object msg, int nb, ConsoleColor color = ConsoleColor.White)
+        {
+            for (int i = 0; i < nb; i++)
+            {
+                Print(msg, color);
+            }
         }
 
         public static void PrintLine(object text, ConsoleColor color = ConsoleColor.White)

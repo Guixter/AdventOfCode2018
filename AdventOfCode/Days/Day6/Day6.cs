@@ -96,14 +96,14 @@ namespace AdventOfCode
             grid.Print((Cell cell, int x, int y) =>
             {
                 if (cell.closestPointId != -1 && MathUtils.ManhattanDistance(points[cell.closestPointId].pos, new float2(x, y)) == 0)
-                    IO.Print((char)(cell.closestPointId + 'A'));
+                    return (char)(cell.closestPointId + 'A');
                 else
-                    IO.Print((char)(cell.closestPointId + 'a'));
+                    return (char)(cell.closestPointId + 'a');
             });
 
             grid.Print((Cell cell, int x, int y) =>
             {
-                Console.Write(cell.distanceToClosestPoint + "-");
+                return cell.distanceToClosestPoint + "-";
             });
         }
 

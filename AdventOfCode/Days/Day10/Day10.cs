@@ -57,7 +57,11 @@ namespace AdventOfCode
             }
 
             grid.Print((value, x, y) => {
-                IO.Print(value ? "# " : "' ", value ? ConsoleColor.Green : ConsoleColor.White);
+                return new PrintData
+                {
+                    text = value ? "# " : "' ",
+                    color = value ? ConsoleColor.Green : ConsoleColor.White
+                };
             });
         }
 
