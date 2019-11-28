@@ -1,7 +1,38 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace AdventOfCodeTools
 {
+    public class Printer
+    {
+        public string text = "";
+        public ConsoleColor color = ConsoleColor.White;
+        public ConsoleColor background = ConsoleColor.Black;
+
+        public Printer(string text = "", ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
+        {
+            this.text = text;
+            this.color = color;
+            this.background = background;
+        }
+
+        public static implicit operator Printer(string value)
+        {
+            return new Printer()
+            {
+                text = value
+            };
+        }
+
+        public static implicit operator Printer(char value)
+        {
+            return new Printer()
+            {
+                text = value.ToString()
+            };
+        }
+    }
+
     public class Grid<T>
     {
         public static Grid<T> Constant(int xLength, int yLength, T value)
@@ -43,7 +74,7 @@ namespace AdventOfCodeTools
         }
 
 
-        protected T[,] m_Grid;
+        internal T[,] m_Grid;
         public int xLength { get => m_Grid.GetLength(0); }
         public int yLength { get => m_Grid.GetLength(1); }
         public VectorInt AllX => VectorInt.Incremental(xLength);
@@ -54,6 +85,12 @@ namespace AdventOfCodeTools
         {
             m_Grid = new T[xLength, yLength];
         }
+
+        internal Grid(T[,] grid)
+        {
+            m_Grid = grid;
+        }
+
 
         public T this[int x, int y]
         {
@@ -199,7 +236,7 @@ namespace AdventOfCodeTools
             return result;
         }
 
-        public void Print(Func<T, int, int, PrintData> cellPrinter = null, bool reverseY = false, int cellLengthX = 3, int cellLengthY = 0, bool framed = false, int minX = 0, int maxX = int.MaxValue, int minY = 0, int maxY = int.MaxValue, int offsetX = 0, int offsetY = 0)
+        public void Print(Func<T, int, int, Printer> cellPrinter = null, bool reverseY = false, int cellLengthX = 3, int cellLengthY = 0, bool framed = false, int minX = 0, int maxX = int.MaxValue, int minY = 0, int maxY = int.MaxValue, int offsetX = 0, int offsetY = 0)
         {
             // Set a default cell printer if necessary
             if (cellPrinter == null)
@@ -208,36 +245,36 @@ namespace AdventOfCodeTools
             maxX = Math.Min(maxX, xLength);
             maxY = Math.Min(maxY, yLength);
 
-            Action<PrintData> drawCell = (PrintData printer) =>
+            Action<Printer> drawCell = (Printer printer) =>
             {
                 var txtLength = printer.text.Length;
                 var halfEmptyLength = (cellLengthX - txtLength) / 2;
-                IO.PrintMultiple(' ', halfEmptyLength);
-                IO.Print(printer.text, printer.color, printer.background);
-                IO.PrintMultiple(' ', cellLengthX - txtLength - halfEmptyLength);
+                IO.PrintMultiple(" ", halfEmptyLength);
+                IO.Print(printer);
+                IO.PrintMultiple(" ", cellLengthX - txtLength - halfEmptyLength);
             };
 
             Action drawHorizontalFrame = () => {
-                drawCell(new PrintData(" ", ConsoleColor.DarkGray));
-                IO.Print('-', ConsoleColor.DarkGray);
+                drawCell(new Printer(" ", ConsoleColor.DarkGray));
+                IO.Print("-", ConsoleColor.DarkGray);
                 for (var x = minX; x < maxX; x++)
                 {
-                    IO.PrintMultiple('-', cellLengthX, ConsoleColor.DarkGray);
+                    IO.PrintMultiple("-", cellLengthX, ConsoleColor.DarkGray);
                 }
-                IO.Print('-', ConsoleColor.DarkGray);
+                IO.Print("-", ConsoleColor.DarkGray);
                 Console.WriteLine();
             };
 
             // Draw the top of the frame
             if (framed)
             {
-                drawCell(new PrintData(" ", ConsoleColor.DarkGray));
-                IO.Print(' ');
+                drawCell(new Printer(" ", ConsoleColor.DarkGray));
+                IO.Print(" ");
 
                 // Print the column number
                 for (var x = minX; x < maxX; x++)
                 {
-                    drawCell(new PrintData((x + offsetX).ToString(), ConsoleColor.DarkGray));
+                    drawCell(new Printer((x + offsetX).ToString(), ConsoleColor.DarkGray));
                 }
 
                 Console.WriteLine();
@@ -250,9 +287,9 @@ namespace AdventOfCodeTools
                 if (framed)
                 {
                     var yValue = reverseY ? yLength - (y + offsetY) - 1 : y;
-                    drawCell(new PrintData((yValue + offsetY).ToString(), ConsoleColor.DarkGray));
+                    drawCell(new Printer((yValue + offsetY).ToString(), ConsoleColor.DarkGray));
 
-                    IO.Print('|', ConsoleColor.DarkGray);
+                    IO.Print("|", ConsoleColor.DarkGray);
                 }
 
                 // Draw the content of the grid
@@ -266,11 +303,11 @@ namespace AdventOfCodeTools
                 // Draw the right of the frame
                 if (framed)
                 {
-                    IO.Print('|', ConsoleColor.DarkGray);
+                    IO.Print("|", ConsoleColor.DarkGray);
                 }
 
                 Console.WriteLine();
-                IO.PrintMultiple('\n', cellLengthY);
+                IO.PrintMultiple("\n", cellLengthY);
             }
 
             // Draw the bottom of the frame
@@ -278,60 +315,46 @@ namespace AdventOfCodeTools
                 drawHorizontalFrame();
         }
 
-
-
-        public static implicit operator Grid<T>(T value)
+        public Grid<K> Map<K>(Func<T, K> func)
         {
-            var result = new Grid<T>(1, 1);
-            result[0, 0] = value;
-            return result;
-        }
-    }
+            Debug.Assert(func != null);
 
-    public class PrintData {
-        public string text = "";
-        public ConsoleColor color = ConsoleColor.White;
-        public ConsoleColor background = ConsoleColor.Black;
-
-        public PrintData(string text = "", ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
-        {
-            this.text = text;
-            this.color = color;
-            this.background = background;
-        }
-
-        public static implicit operator PrintData(string value)
-        {
-            return new PrintData() {
-                text = value
-            };
-        }
-
-        public static implicit operator PrintData(char value)
-        {
-            return new PrintData()
-            {
-                text = value.ToString()
-            };
-        }
-    }
-
-    // TODO math operations
-    public class GridInt : Grid<int>
-    {
-        public new static GridInt Constant(int xLength, int yLength, int value)
-        {
-            var result = new GridInt(xLength, yLength);
+            var result = new Grid<K>(xLength, yLength);
 
             for (var x = 0; x < xLength; x++)
             {
                 for (var y = 0; y < yLength; y++)
                 {
-                    result[x, y] = value;
+                    result[x, y] = func.Invoke(this[x, y]);
                 }
             }
 
             return result;
+        }
+
+        public static Grid<K> Combine<T1, T2, K>(Grid<T1> left, Grid<T2> right, Func<T1, T2, K> func)
+        {
+            Debug.Assert(left.xLength == right.xLength && left.yLength == right.yLength);
+
+            var result = new Grid<K>(left.xLength, left.yLength);
+
+            for (var x = 0; x < left.xLength; x++)
+            {
+                for (var y = 0; y < left.yLength; y++)
+                {
+                    result[x, y] = func.Invoke(left[x, y], right[x, y]);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    public class GridInt : Grid<int>
+    {
+        public new static GridInt Constant(int xLength, int yLength, int value)
+        {
+            return new GridInt(Grid<int>.Constant(xLength, yLength, value));
         }
 
         public new static GridInt Constant(int size, int value)
@@ -341,15 +364,7 @@ namespace AdventOfCodeTools
 
         public new static GridInt Diagonal(Vector<int> values)
         {
-            var size = values.Length;
-            var result = new GridInt(size, size);
-
-            for (var i = 0; i < size; i++)
-            {
-                result[i, i] = values[i];
-            }
-
-            return result;
+            return new GridInt(Grid<int>.Diagonal(values));
         }
 
         public new static GridInt Diagonal(int size, int value)
@@ -358,33 +373,31 @@ namespace AdventOfCodeTools
         }
 
 
-        public GridInt(int xLength, int yLength) : base (xLength, yLength) { }
+        public GridInt(int xLength, int yLength) : base(xLength, yLength) { }
+
+        public GridInt(Grid<int> grid) : base(grid.m_Grid) { }
+
+        public new GridInt this[VectorInt xList, VectorInt yList]
+        {
+            get
+            {
+                return new GridInt(base[xList, yList]);
+            }
+            set
+            {
+                base[xList, yList] = value;
+            }
+        }
 
         public new VectorInt this[VectorInt xList, int y]
         {
             get
             {
-                var nbX = xList.Length;
-
-                var result = new VectorInt(nbX);
-
-                for (var i = 0; i < nbX; i++)
-                {
-                    var x = xList[i];
-                    result[i] = this[x, y];
-                }
-
-                return result;
+                return new VectorInt(base[xList, y]);
             }
             set
             {
-                var nbX = xList.Length;
-
-                for (var i = 0; i < nbX; i++)
-                {
-                    var x = xList[i];
-                    this[x, y] = value[i];
-                }
+                base[xList, y] = value;
             }
         }
 
@@ -392,28 +405,93 @@ namespace AdventOfCodeTools
         {
             get
             {
-                var nbY = yList.Length;
-
-                var result = new VectorInt(nbY);
-
-                for (var i = 0; i < nbY; i++)
-                {
-                    var y = yList[i];
-                    result[i] = this[x, y];
-                }
-
-                return result;
+                return new VectorInt(base[x, yList]);
             }
             set
             {
-                var nbY = yList.Length;
-
-                for (var i = 0; i < nbY; i++)
-                {
-                    var y = yList[i];
-                    this[x, y] = value[i];
-                }
+                base[x, yList] = value;
             }
+        }
+
+        public new GridInt Clone()
+        {
+            return new GridInt(base.Clone());
+        }
+
+        public new GridInt Transposed()
+        {
+            return new GridInt(base.Transposed());
+        }
+
+        public GridInt Map(Func<int, int> func)
+        {
+            return new GridInt(base.Map(func));
+        }
+
+        public static GridInt Combine(GridInt left, GridInt right, Func<int, int, int> func)
+        {
+            return new GridInt(Grid<int>.Combine(left, right, func));
+        }
+
+
+        public static GridInt operator +(GridInt left, GridInt right)
+        {
+            return Combine(left, right, (l, r) => l + r);
+        }
+
+        public static GridInt operator -(GridInt left, GridInt right)
+        {
+            return Combine(left, right, (l, r) => l - r);
+        }
+
+        public static GridInt operator *(GridInt left, GridInt right)
+        {
+            return Combine(left, right, (l, r) => l * r);
+        }
+
+        public static GridInt operator /(GridInt left, GridInt right)
+        {
+            return Combine(left, right, (l, r) => l / r);
+        }
+
+        public static GridInt operator +(GridInt left, int right)
+        {
+            return left.Map(x => x + right);
+        }
+
+        public static GridInt operator -(GridInt left, int right)
+        {
+            return left.Map(x => x - right);
+        }
+
+        public static GridInt operator *(GridInt left, int right)
+        {
+            return left.Map(x => x * right);
+        }
+
+        public static GridInt operator /(GridInt left, int right)
+        {
+            return left.Map(x => x / right);
+        }
+
+        public static GridInt operator +(int left, GridInt right)
+        {
+            return right + left;
+        }
+
+        public static GridInt operator -(int left, GridInt right)
+        {
+            return right - left;
+        }
+
+        public static GridInt operator *(int left, GridInt right)
+        {
+            return right * left;
+        }
+
+        public static GridInt operator /(int left, GridInt right)
+        {
+            return right / left;
         }
     }
 }

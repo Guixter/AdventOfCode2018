@@ -27,7 +27,7 @@ namespace AdventOfCode
             var gridSerialNumber = 9306;
             var powerGrid = BuildPowerGrid(gridSerialNumber);
 
-            var totalGrid = new Grid<int>(gridSize, gridSize);
+            var totalGrid = new GridInt(gridSize, gridSize);
             var maxSquareSize = (0, 0, 0, float.NegativeInfinity);
             for (var squareSize = 1; squareSize < gridSize; squareSize++)
             {
@@ -41,11 +41,11 @@ namespace AdventOfCode
         }
 
         // Each cell of the total grid contains the total power of the square whose top-left cell is this one
-        private static (int, int, float) ComputeMaxPowerSquare(int squareSize, int gridSerialNumber, Grid<int> powerGrid, Grid<int> totalGrid = null)
+        private static (int, int, float) ComputeMaxPowerSquare(int squareSize, int gridSerialNumber, GridInt powerGrid, GridInt totalGrid = null)
         {
             var fromScratch = totalGrid == null;
             if (fromScratch)
-                totalGrid = new Grid<int>(gridSize - squareSize + 1, gridSize - squareSize + 1);
+                totalGrid = new GridInt(gridSize - squareSize + 1, gridSize - squareSize + 1);
 
             var maxPoint = (0, 0, float.NegativeInfinity);
             var borderX = totalGrid.xLength - squareSize + 1;
@@ -65,7 +65,7 @@ namespace AdventOfCode
             return maxPoint;
         }
 
-        private static int ComputeTotalPower(int x, int y, int squareSize, Grid<int> powerGrid, Grid<int> lastTotalGrid, bool fromScratch)
+        private static int ComputeTotalPower(int x, int y, int squareSize, GridInt powerGrid, GridInt lastTotalGrid, bool fromScratch)
         {
             var power = fromScratch ? 0 : lastTotalGrid[x, y];
 
@@ -91,9 +91,9 @@ namespace AdventOfCode
             return power;
         }
 
-        private static Grid<int> BuildPowerGrid(int gridSerialNumber)
+        private static GridInt BuildPowerGrid(int gridSerialNumber)
         {
-            var powerGrid = new Grid<int>(gridSize, gridSize);
+            var powerGrid = new GridInt(gridSize, gridSize);
             for (var i = 0; i < gridSize; i++)
             {
                 for (var j = 0; j < gridSize; j++)
@@ -114,7 +114,7 @@ namespace AdventOfCode
             return power - 5;
         }
 
-        private static void AddPower(int x, int y, int power, int squareSize, Grid<int> grid)
+        private static void AddPower(int x, int y, int power, int squareSize, GridInt grid)
         {
             for (var i = 0; i < squareSize; i++)
             {

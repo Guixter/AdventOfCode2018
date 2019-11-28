@@ -5,12 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace AdventOfCodeTools
 {
-    // TODO :
-    // - ** debug tools ** !!!
-
     public class IO
     {
-        public static void Print(object text, ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
+        public static void Print(string text, ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
         {
             Console.ForegroundColor = color;
             Console.BackgroundColor = background;
@@ -18,19 +15,17 @@ namespace AdventOfCodeTools
             Console.ResetColor();
         }
 
-        public static void PrintMultiple(object msg, int nb, ConsoleColor color = ConsoleColor.White)
+        public static void Print(Printer printer)
+        {
+            Print(printer.text, printer.color, printer.background);
+        }
+
+        public static void PrintMultiple(string msg, int nb, ConsoleColor color = ConsoleColor.White)
         {
             for (int i = 0; i < nb; i++)
             {
                 Print(msg, color);
             }
-        }
-
-        public static void PrintLine(object text, ConsoleColor color = ConsoleColor.White)
-        {
-            Console.ForegroundColor = color;
-            Console.WriteLine(text);
-            Console.ResetColor();
         }
 
         public static string[] GetStringLines(string pathFromDaysFolder)
