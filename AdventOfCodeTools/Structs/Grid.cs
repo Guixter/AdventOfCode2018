@@ -1,38 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace AdventOfCodeTools
 {
-    public class Printer
-    {
-        public string text = "";
-        public ConsoleColor color = ConsoleColor.White;
-        public ConsoleColor background = ConsoleColor.Black;
-
-        public Printer(string text = "", ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
-        {
-            this.text = text;
-            this.color = color;
-            this.background = background;
-        }
-
-        public static implicit operator Printer(string value)
-        {
-            return new Printer()
-            {
-                text = value
-            };
-        }
-
-        public static implicit operator Printer(char value)
-        {
-            return new Printer()
-            {
-                text = value.ToString()
-            };
-        }
-    }
-
     public class Grid<T>
     {
         public static Grid<T> Constant(int xLength, int yLength, T value)
@@ -84,6 +57,18 @@ namespace AdventOfCodeTools
         public Grid(int xLength, int yLength)
         {
             m_Grid = new T[xLength, yLength];
+        }
+
+        public Grid(int xLength, int yLength, params T[] values) : this(xLength, yLength)
+        {
+            Debug.Assert(values.Length == xLength * yLength);
+
+            for (var i = 0; i < values.Length; i++)
+            {
+                var x = i % xLength;
+                var y = i / xLength;
+                m_Grid[x, y] = values[i];
+            }
         }
 
         internal Grid(T[,] grid)
@@ -192,6 +177,7 @@ namespace AdventOfCodeTools
             }
         }
 
+
         public T[] ToArray()
         {
             var flat = new T[xLength * yLength];
@@ -200,7 +186,7 @@ namespace AdventOfCodeTools
             {
                 for (var y = 0; y < yLength; y++)
                 {
-                    flat[x * yLength + y] = m_Grid[x, y];
+                    flat[y * xLength + x] = m_Grid[x, y];
                 }
             }
             return flat;
@@ -348,6 +334,21 @@ namespace AdventOfCodeTools
 
             return result;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Grid<T> other && Equals(other);
+        }
+
+        public bool Equals(Grid<T> other)
+        {
+            return m_Grid.Equals(other.m_Grid);
+        }
+
+        public override int GetHashCode()
+        {
+            return m_Grid.GetHashCode();
+        }
     }
 
     public class GridInt : Grid<int>
@@ -374,6 +375,8 @@ namespace AdventOfCodeTools
 
 
         public GridInt(int xLength, int yLength) : base(xLength, yLength) { }
+
+        public GridInt(int xLength, int yLength, params int[] values) : base(xLength, yLength, values) { }
 
         public GridInt(Grid<int> grid) : base(grid.m_Grid) { }
 
@@ -492,6 +495,33 @@ namespace AdventOfCodeTools
         public static GridInt operator /(int left, GridInt right)
         {
             return right / left;
+        }
+
+        public static bool operator ==(GridInt c1, GridInt c2)
+        {
+            return c1.Equals(c2);
+        }
+
+        public static bool operator !=(GridInt c1, GridInt c2)
+        {
+            return !c1.Equals(c2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is GridInt other && Equals(other);
+        }
+
+        public bool Equals(GridInt other)
+        {
+            return Combine(this, other, (l, r) => l.Equals(r))
+                .ToArray()
+                .Aggregate(true, (acc, curr) => acc && curr);
+        }
+
+        public override int GetHashCode()
+        {
+            return m_Grid.GetHashCode();
         }
     }
 }

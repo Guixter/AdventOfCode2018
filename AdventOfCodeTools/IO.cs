@@ -77,4 +77,34 @@ namespace AdventOfCodeTools
             return Match(new Regex(regex), input);
         }
     }
+
+    public class Printer
+    {
+        public string text = "";
+        public ConsoleColor color = ConsoleColor.White;
+        public ConsoleColor background = ConsoleColor.Black;
+
+        public Printer(string text = "", ConsoleColor color = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
+        {
+            this.text = text;
+            this.color = color;
+            this.background = background;
+        }
+
+        public static implicit operator Printer(string value)
+        {
+            return new Printer()
+            {
+                text = value
+            };
+        }
+
+        public static implicit operator Printer(char value)
+        {
+            return new Printer()
+            {
+                text = value.ToString()
+            };
+        }
+    }
 }
